@@ -6,8 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
@@ -43,93 +42,93 @@ export default function LoginPage() {
           <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center shadow-2xl mb-4">
             <span className="text-2xl font-bold text-primary">✓</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">TruCon NDTS</h1>
-          <p className="text-white/80">Nigeria Digital Trust System</p>
+          <h1 className="text-3xl font-bold text-white mb-2">TruCon</h1>
+          <p className="text-white/80">Sign in to your account</p>
         </div>
 
         {/* Form Card */}
-        <Card className="bg-white/95 backdrop-blur-md border-white/20 shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-            <CardDescription className="text-center">Sign in to access your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Error Message */}
-              {error && (
-                <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-lg animate-slide-down">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
+        <Card className="bg-white/95 backdrop-blur-md border-white/20 shadow-2xl p-6 sm:p-8">
+          {/* Trust-first notice */}
+          <div className="mb-4 p-3 rounded-md border bg-neutral-50 border-neutral-200">
+            <p className="text-xs text-neutral-700">
+              TruCon never accesses your personal information without your explicit consent. Manage what your information
+              is used for in your Dashboard at any time.
+            </p>
+          </div>
 
-              {/* Email Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-primary">Email Address</label>
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full"
-                />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-lg animate-slide-down">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{error}</p>
               </div>
+            )}
 
-              {/* Password Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-primary">Password</label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-primary transition"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-neutral-300" />
-                  <span className="text-neutral-600">Remember me</span>
-                </label>
-                <a href="#" className="text-primary hover:text-primary-light transition font-medium">
-                  Forgot password?
-                </a>
-              </div>
-
-              {/* Submit Button */}
-              <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90">
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-
-            {/* Divider */}
-            <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-neutral-300" />
-              <span className="text-sm text-neutral-500">or</span>
-              <div className="flex-1 h-px bg-neutral-300" />
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-primary">Email Address</label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
+              />
             </div>
 
-            {/* Sign Up Link */}
-            <p className="text-center text-neutral-600">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:text-primary-light font-semibold transition">
-                Sign up
-              </Link>
-            </p>
-          </CardContent>
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-primary">Password</label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-primary transition"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded border-neutral-300" />
+                <span className="text-neutral-600">Remember me</span>
+              </label>
+              <a href="#" className="text-primary hover:text-primary-light transition font-medium">
+                Forgot password?
+              </a>
+            </div>
+
+            {/* Submit Button */}
+            <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90">
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="flex-1 h-px bg-neutral-300" />
+            <span className="text-sm text-neutral-500">or</span>
+            <div className="flex-1 h-px bg-neutral-300" />
+          </div>
+
+          {/* Sign Up Link */}
+          <p className="text-center text-neutral-600">
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-primary hover:text-primary-light font-semibold transition">
+              Sign up
+            </Link>
+          </p>
         </Card>
 
         {/* Back to Home */}

@@ -16,6 +16,7 @@ export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    nin: "",
     password: "",
     confirmPassword: "",
     role: "citizen" as "citizen" | "organization",
@@ -61,41 +62,46 @@ export default function SignUpPage() {
 
     setIsLoading(true)
 
-    // Simulate signup - replace with actual auth
     setTimeout(() => {
       setIsLoading(false)
       if (formData.role === "citizen") {
-        router.push("/dashboard")
+        router.push("/onboarding")
       } else {
         router.push("/admin/organization")
       }
-    }, 1000)
+    }, 800)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-light to-primary flex items-center justify-center p-4">
-      {/* Background glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-glow" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#004C9914' }}>
+      {/* Watermark */}
+      <div className="absolute inset-0 pointer-events-none opacity-5" style={{ backgroundImage: 'url(/placeholder.svg)', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
 
       <div className="w-full max-w-md relative z-10 animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center shadow-2xl mb-4">
-            <span className="text-2xl font-bold text-primary">✓</span>
+            <span className="text-2xl font-bold" style={{ color: '#004C99' }}>✓</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">TruCon NDTS</h1>
-          <p className="text-white/80">Create your account</p>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: '#004C99' }}>TruCon NDTS</h1>
+          <p className="text-[#4A4A4A]">Create your account</p>
         </div>
 
         {/* Form Card */}
-        <Card className="bg-white/95 backdrop-blur-md border-white/20 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <Card className="bg-white/95 backdrop-blur-md border border-[#E0E4E8] shadow-2xl max-h-[90vh] overflow-y-auto">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Get Started</CardTitle>
+            <CardTitle className="text-2xl text-center" style={{ color: '#004C99' }}>Get Started</CardTitle>
             <CardDescription className="text-center">Join Nigeria Digital Trust System</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Trust-first notice */}
+            <div className="mb-4 p-3 rounded-md border" style={{ background: '#F7F9FB', borderColor: '#E0E4E8' }}>
+              <p className="text-xs" style={{ color: '#4A4A4A' }}>
+                TruCon never accesses your personal information without your explicit consent. You decide what is shared,
+                with whom, and for how long. You can manage and revoke consent anytime in your Dashboard.
+              </p>
+            </div>
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Login</TabsTrigger>
@@ -124,12 +130,13 @@ export default function SignUpPage() {
 
                   {/* Role Selection */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-primary">I am a</label>
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>I am a</label>
                     <select
                       name="role"
                       value={formData.role}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                      style={{ borderColor: '#E0E4E8' }}
                     >
                       <option value="citizen">Citizen</option>
                       <option value="organization">Organization</option>
@@ -138,7 +145,7 @@ export default function SignUpPage() {
 
                   {/* Name Field */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-primary">Full Name</label>
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>Full Name</label>
                     <Input
                       type="text"
                       name="name"
@@ -152,7 +159,7 @@ export default function SignUpPage() {
 
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-primary">Email Address</label>
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>Email Address</label>
                     <Input
                       type="email"
                       name="email"
@@ -164,9 +171,22 @@ export default function SignUpPage() {
                     />
                   </div>
 
+                  {/* NIN Field */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>NIN (optional)</label>
+                    <Input
+                      type="text"
+                      name="nin"
+                      placeholder="1234 5678 9012"
+                      value={formData.nin}
+                      onChange={handleChange}
+                      className="w-full"
+                    />
+                  </div>
+
                   {/* Password Field */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-primary">Password</label>
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>Password</label>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
@@ -205,7 +225,7 @@ export default function SignUpPage() {
 
                   {/* Confirm Password Field */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-primary">Confirm Password</label>
+                    <label className="block text-sm font-medium" style={{ color: '#004C99' }}>Confirm Password</label>
                     <div className="relative">
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
@@ -243,15 +263,8 @@ export default function SignUpPage() {
                   {/* Terms Checkbox */}
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" className="w-4 h-4 rounded border-neutral-300 mt-1" required />
-                    <span className="text-sm text-neutral-600">
-                      I agree to the{" "}
-                      <a href="#" className="text-primary hover:text-primary-light font-medium">
-                        Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a href="#" className="text-primary hover:text-primary-light font-medium">
-                        Privacy Policy
-                      </a>
+                    <span className="text-sm" style={{ color: '#4A4A4A' }}>
+                      I consent to TruCon’s data terms (manage in Dashboard).
                     </span>
                   </label>
 
@@ -259,7 +272,7 @@ export default function SignUpPage() {
                   <Button
                     type="submit"
                     disabled={isLoading || !isPasswordValid || !passwordsMatch}
-                    className="w-full bg-primary hover:bg-primary/90"
+                    className="w-full"
                   >
                     {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
@@ -269,15 +282,15 @@ export default function SignUpPage() {
 
             {/* Divider */}
             <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-neutral-300" />
-              <span className="text-sm text-neutral-500">or</span>
-              <div className="flex-1 h-px bg-neutral-300" />
+              <div className="flex-1 h-px" style={{ background: '#E0E4E8' }} />
+              <span className="text-sm" style={{ color: '#8B95A1' }}>or</span>
+              <div className="flex-1 h-px" style={{ background: '#E0E4E8' }} />
             </div>
 
             {/* Sign In Link */}
-            <p className="text-center text-neutral-600">
+            <p className="text-center" style={{ color: '#4A4A4A' }}>
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:text-primary-light font-semibold transition">
+              <Link href="/login" className="font-semibold" style={{ color: '#004C99' }}>
                 Sign in
               </Link>
             </p>
@@ -286,7 +299,7 @@ export default function SignUpPage() {
 
         {/* Back to Home */}
         <div className="text-center mt-6">
-          <Link href="/" className="text-white/80 hover:text-white transition text-sm">
+          <Link href="/" className="text-sm" style={{ color: '#004C99' }}>
             Back to home
           </Link>
         </div>

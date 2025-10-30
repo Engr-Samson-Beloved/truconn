@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Bell, MessageSquare, UserPlus, CheckCircle, Trash2 } from "lucide-react"
+import { Bell, ShieldAlert, AlertTriangle, CheckCircle, Clock, Building2 } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
 
 interface Notification {
   id: string
-  type: "connection" | "message" | "verification"
+  type: "data_access" | "consent_expiry" | "org_request" | "violation" | "revocation"
   title: string
   description: string
-  avatar: string
+  meta?: string
   timestamp: string
   read: boolean
 }
@@ -18,37 +18,46 @@ interface Notification {
 const mockNotifications: Notification[] = [
   {
     id: "1",
-    type: "connection",
-    title: "Sarah Johnson",
-    description: "sent you a connection request",
-    avatar: "/professional-woman-diverse.png",
+    type: "data_access",
+    title: "First Bank of Nigeria",
+    description: "Accessed your Financial data for account verification",
+    meta: "Read access • Financial",
     timestamp: "2 hours ago",
     read: false,
   },
   {
     id: "2",
-    type: "message",
-    title: "Michael Chen",
-    description: "sent you a message",
-    avatar: "/professional-man.jpg",
+    type: "consent_expiry",
+    title: "Consent expiring soon",
+    description: "Health data consent will expire in 7 days",
+    meta: "Health • Lagos State Health Services",
     timestamp: "4 hours ago",
     read: false,
   },
   {
     id: "3",
-    type: "verification",
-    title: "Account Verified",
-    description: "Your identity has been verified successfully",
-    avatar: "/checkmark-badge.jpg",
+    type: "org_request",
+    title: "New data request",
+    description: "GTBank requested access to your Identity data",
+    meta: "Purpose: KYC • Duration: 1 year",
     timestamp: "1 day ago",
     read: true,
   },
   {
     id: "4",
-    type: "connection",
-    title: "Emma Wilson",
-    description: "accepted your connection request",
-    avatar: "/professional-woman-diverse.png",
+    type: "violation",
+    title: "Compliance alert",
+    description: "Unusual access pattern detected by Compliance Scanner",
+    meta: "Risk Score: Medium",
+    timestamp: "2 days ago",
+    read: true,
+  },
+  {
+    id: "5",
+    type: "revocation",
+    title: "Access revoked",
+    description: "You revoked Identity data access from University of Lagos",
+    meta: "Effective immediately",
     timestamp: "2 days ago",
     read: true,
   },
@@ -57,14 +66,18 @@ const mockNotifications: Notification[] = [
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState(mockNotifications)
 
-  const getIcon = (type: string) => {
+  const getIcon = (type: Notification["type"]) => {
     switch (type) {
-      case "connection":
-        return <UserPlus className="w-5 h-5 text-blue-600" />
-      case "message":
-        return <MessageSquare className="w-5 h-5 text-green-600" />
-      case "verification":
-        return <CheckCircle className="w-5 h-5 text-emerald-600" />
+      case "data_access":
+        return <Building2 className="w-5 h-5 text-[#004C99]" />
+      case "consent_expiry":
+        return <Clock className="w-5 h-5 text-[#F9C80E]" />
+      case "org_request":
+        return <Bell className="w-5 h-5 text-[#00B38F]" />
+      case "violation":
+        return <AlertTriangle className="w-5 h-5 text-red-600" />
+      case "revocation":
+        return <CheckCircle className="w-5 h-5 text-[#00B38F]" />
       default:
         return <Bell className="w-5 h-5 text-gray-600" />
     }
@@ -85,8 +98,8 @@ export default function NotificationsPage() {
         <div className="max-w-2xl mx-auto p-4 md:p-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Bell className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-lg" style={{ background: '#004C991A' }}>
+                <ShieldAlert className="w-6 h-6" style={{ color: '#004C99' }} />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
@@ -108,37 +121,40 @@ export default function NotificationsPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={`flex items-start gap-4 p-4 rounded-lg border transition-all ${
-                      notification.read ? "bg-background border-border" : "bg-blue-50 border-blue-200"
+                      notification.read ? "bg-background border-border" : "bg-white border-[#E0E4E8]"
                     }`}
                   >
-                    <img
-                      src={notification.avatar || "/placeholder.svg"}
-                      alt={notification.title}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#F0F2F5' }}>
+                      {getIcon(notification.type)}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="font-semibold text-foreground">{notification.title}</p>
                           <p className="text-sm text-muted-foreground">{notification.description}</p>
+                          {notification.meta && (
+                            <p className="text-xs text-muted-foreground mt-1">{notification.meta}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1">{notification.timestamp}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {!notification.read && (
                             <button
                               onClick={() => markAsRead(notification.id)}
-                              className="p-1 hover:bg-gray-200 rounded transition-colors"
+                              className="p-1 rounded transition-colors"
                               title="Mark as read"
+                              style={{ color: '#004C99' }}
                             >
-                              <CheckCircle className="w-4 h-4 text-gray-400" />
+                              Mark as read
                             </button>
                           )}
                           <button
                             onClick={() => deleteNotification(notification.id)}
-                            className="p-1 hover:bg-red-100 rounded transition-colors"
+                            className="p-1 rounded transition-colors"
                             title="Delete"
+                            style={{ color: '#E74C3C' }}
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            Delete
                           </button>
                         </div>
                       </div>

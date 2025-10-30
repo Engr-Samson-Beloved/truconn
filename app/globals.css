@@ -4,39 +4,39 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #F7F9FB;
+  --foreground: #222222;
+  --card: #FFFFFF;
+  --card-foreground: #222222;
+  --popover: #FFFFFF;
+  --popover-foreground: #222222;
+  --primary: #004C99;
+  --primary-foreground: #FFFFFF;
+  --secondary: #00B38F;
+  --secondary-foreground: #FFFFFF;
+  --muted: #F0F2F5;
+  --muted-foreground: #4A4A4A;
+  --accent: #F9C80E;
+  --accent-foreground: #222222;
+  --destructive: #E74C3C;
+  --destructive-foreground: #FFFFFF;
+  --border: #E0E4E8;
+  --input: #E0E4E8;
+  --ring: #004C99;
+  --chart-1: #004C99;
+  --chart-2: #00B38F;
+  --chart-3: #F9C80E;
+  --chart-4: #0066CC;
+  --chart-5: #00D4A5;
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #222222;
+  --sidebar-primary: #004C99;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0F2F5;
+  --sidebar-accent-foreground: #222222;
+  --sidebar-border: #E0E4E8;
+  --sidebar-ring: #004C99;
 }
 
 .dark {
@@ -75,22 +75,48 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", "Inter Fallback";
-  --font-mono: "Fira Code", "Fira Code Fallback";
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Fira Code", "Courier New", monospace;
+  
+  /* Typography Scale - TruCon Design System */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights for Readability */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.8;
 
-  /* TruCon Color System - Trust-based Professional Palette */
-  --color-primary: #0f172a; /* Navy Blue - Primary brand color */
-  --color-primary-light: #1e293b; /* Slate 800 - Lighter navy */
-  --color-accent: #3b82f6; /* Trust Blue - Connection accent */
-  --color-accent-light: #60a5fa; /* Light blue - Hover states */
-  --color-success: #10b981; /* Emerald - Verification/trust */
-  --color-warning: #f59e0b; /* Amber - Caution/pending */
-  --color-neutral-50: #f9fafb; /* Off-white background */
-  --color-neutral-100: #f3f4f6; /* Light gray */
-  --color-neutral-200: #e5e7eb; /* Medium gray */
-  --color-neutral-400: #9ca3af; /* Neutral text */
-  --color-neutral-600: #4b5563; /* Dark gray text */
-  --color-neutral-900: #111827; /* Near black */
+  /* TruCon Official Color System - Citizen Data Trust Framework */
+  --color-trust-blue: #004C99; /* Primary - Deep Trust Blue - Governmental authority */
+  --color-trust-blue-light: #0066CC; /* Hover state for trust blue */
+  --color-tech-green: #00B38F; /* Secondary - Innovation, data growth */
+  --color-tech-green-light: #00D4A5; /* Hover state for tech green */
+  --color-gold: #F9C80E; /* Accent - Empowerment, optimism */
+  --color-gold-light: #FBD84D; /* Hover state for gold */
+  --color-bg-primary: #F7F9FB; /* Main background - Clarity, neutrality */
+  --color-text-primary: #222222; /* Primary text - Professional readability */
+  --color-text-secondary: #4A4A4A; /* Secondary text */
+  --color-danger: #E74C3C; /* Transparent risk signaling */
+  --color-danger-light: #EC7063; /* Hover state for danger */
+  --color-white: #FFFFFF;
+  --color-border: #E0E4E8; /* Subtle borders */
+  
+  /* Legacy mappings for compatibility */
+  --color-primary: var(--color-trust-blue);
+  --color-primary-light: var(--color-trust-blue-light);
+  --color-accent: var(--color-tech-green);
+  --color-accent-light: var(--color-tech-green-light);
+  --color-success: var(--color-tech-green);
+  --color-warning: var(--color-gold);
+  --color-neutral-50: var(--color-bg-primary);
+  --color-neutral-100: #F0F2F5;
+  --color-neutral-200: var(--color-border);
+  --color-neutral-400: #8B95A1;
+  --color-neutral-600: var(--color-text-secondary);
+  --color-neutral-900: var(--color-text-primary);
 
   --radius: 0.5rem;
   /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
@@ -138,28 +164,88 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    line-height: var(--line-height-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-primary);
+  }
+  
+  p {
+    line-height: var(--line-height-normal);
+    color: var(--color-text-secondary);
+  }
+  
+  /* Trust-building smooth scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
   .trucon-gradient {
-    @apply bg-gradient-to-br from-primary via-primary-light to-primary;
+    background: linear-gradient(135deg, #004C99 0%, #0066CC 100%);
   }
 
   .trust-badge {
-    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold;
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+    background-color: rgba(0, 179, 143, 0.1);
+    color: #00B38F;
   }
 
   .verified-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold;
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+    background-color: rgba(0, 179, 143, 0.1);
+    color: #00B38F;
+  }
+
+  .empowerment-badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+    background-color: rgba(249, 200, 14, 0.15);
+    color: #C89600;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:scale-105;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-hover:hover {
+    @apply shadow-lg;
+    transform: translateY(-4px);
   }
 
   .glass-effect {
-    @apply bg-white/80 backdrop-blur-md border border-white/20;
+    @apply bg-white/95 backdrop-blur-md border border-border;
+  }
+  
+  .trust-button {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-out;
+    background: #004C99;
+    color: white;
+  }
+  
+  .trust-button:hover {
+    background: #0066CC;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 76, 153, 0.3);
+  }
+  
+  .trust-ring {
+    animation: trust-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes trust-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 }
 

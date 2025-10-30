@@ -12,23 +12,29 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-bold">✓</span>
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl" style={{ color: '#004C99' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#004C99' }}>
+            <span className="text-white text-lg font-bold">✓</span>
           </div>
-          TruCon
+          <span className="font-bold">TruCon</span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <Link href="#features" className="text-foreground/70 hover:text-foreground transition">
-            Features
+          <Link href="/" className="text-sm font-medium transition-colors hover:text-primary" style={{ color: '#4A4A4A' }}>
+            Home
           </Link>
-          <Link href="#how-it-works" className="text-foreground/70 hover:text-foreground transition">
-            How It Works
+          <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary" style={{ color: '#4A4A4A' }}>
+            Dashboard
           </Link>
-          <Link href="#testimonials" className="text-foreground/70 hover:text-foreground transition">
-            Testimonials
+          <Link href="/transparency" className="text-sm font-medium transition-colors hover:text-primary" style={{ color: '#4A4A4A' }}>
+            Verify
+          </Link>
+          <Link href="#features" className="text-sm font-medium transition-colors hover:text-primary" style={{ color: '#4A4A4A' }}>
+            Learn
+          </Link>
+          <Link href="#contact" className="text-sm font-medium transition-colors hover:text-primary" style={{ color: '#4A4A4A' }}>
+            Support
           </Link>
         </div>
 
