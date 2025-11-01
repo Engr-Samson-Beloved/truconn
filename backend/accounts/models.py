@@ -30,7 +30,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = Column(String, primary_key=True)
     full_name = Column(String)
     email = Column(String, unique=True)
-    national_id = Column(String)
     password_hash = Column(Text)
     user_role = Column(Enum(UserRoleEnum))
     created_at = Column(TIMESTAMP)
@@ -51,7 +50,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'national_id']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
 
 
+class Profile(models.Model):
+    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, related_name='profile')
+    title = models.CharField(max_length=20, blank=True)
+    company = models.CharField(max_length=20, blank=True)
+    url = models.URLField(blank=True)
+    phone_no = models.CharField(max_length=20, blank=True)
+    about = models.TextField(blank=True)
+    #profile_pic = models.ImageField(upload_to='profile_photo/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.first_name}'s Profile"
