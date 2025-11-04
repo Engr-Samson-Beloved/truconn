@@ -122,10 +122,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
     ),
-    # Disable CSRF for API endpoints (DRF handles this automatically, but explicit is better)
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
+
 }
 
 # CORS Configuration

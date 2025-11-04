@@ -50,7 +50,6 @@ class LoginView(APIView):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        user = request.user 
-        profile = get_object_or_404(Profile, user=user)
+        profile = get_object_or_404(Profile, user=request.user)
         profile_serializer = ProfileSerializer(profile)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
