@@ -1,11 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Settings, Bell, Lock, Eye, LogOut, FileDown, Trash2, Globe } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
+import { useAuth } from "@/lib/auth/context"
 
 export default function SettingsPage() {
+  const router = useRouter()
+  const { logout } = useAuth()
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: false,
@@ -141,7 +145,15 @@ export default function SettingsPage() {
             </motion.div>
 
             {/* Logout */}
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-colors">
+            <motion.button
+              onClick={() => {
+                logout()
+                router.push("/login")
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-colors"
+            >
               <LogOut className="w-5 h-5" />
               Logout
             </motion.button>

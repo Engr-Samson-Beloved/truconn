@@ -3,14 +3,18 @@
 import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
+import { AuthAPI } from "@/lib/auth/api"
+import { useAuth } from "@/lib/auth/context"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -22,11 +26,34 @@ export default function LoginPage() {
     setError("")
     setIsLoading(true)
 
-    // Simulate login - replace with actual auth
-    setTimeout(() => {
+    try {
+      const response = await AuthAPI.login({ email, password })
+      
+      if (response.user) {
+        // Map backend user role to match frontend expectations
+        const userData = {
+          ...response.user,
+          role: response.user.role?.toLowerCase() || "citizen",
+        }
+        login(userData)
+        
+        // Check for redirect parameter
+        const redirectTo = searchParams.get("redirect")
+        if (redirectTo) {
+          router.push(redirectTo)
+        } else {
+          // Redirect based on role
+          if (userData.role === "organization" || userData.role === "ORGANIZATION") {
+            router.push("/admin/organization")
+          } else {
+            router.push("/dashboard")
+          }
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.")
       setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+    }
   }
 
   return (
