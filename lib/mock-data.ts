@@ -258,3 +258,117 @@ export const mockStats = {
   complianceRate: 94.5,
   violations: 12,
 }
+
+// User interface for Connect page
+export interface User {
+  id: string
+  name: string
+  title: string
+  company: string
+  image: string
+  trustScore: number
+  verified: boolean
+  mutualConnections: number
+  category: "developers" | "designers" | "writers" | "entrepreneurs"
+  profession: string
+}
+
+// Mock Users for Connect page
+export const mockUsers: User[] = [
+  {
+    id: "1",
+    name: "Adebayo Johnson",
+    title: "Senior Software Engineer",
+    company: "TechFlow Solutions",
+    image: "/professional-man.jpg",
+    trustScore: 4.8,
+    verified: true,
+    mutualConnections: 12,
+    category: "developers",
+    profession: "Software Engineer",
+  },
+  {
+    id: "2",
+    name: "Chinwe Okafor",
+    title: "UI/UX Designer",
+    company: "Design Studio Pro",
+    image: "/professional-woman-diverse.png",
+    trustScore: 4.9,
+    verified: true,
+    mutualConnections: 8,
+    category: "designers",
+    profession: "UI/UX Designer",
+  },
+  {
+    id: "3",
+    name: "Emeka Okonkwo",
+    title: "Technical Writer",
+    company: "Content Masters",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.6,
+    verified: true,
+    mutualConnections: 5,
+    category: "writers",
+    profession: "Technical Writer",
+  },
+  {
+    id: "4",
+    name: "Funke Adeyemi",
+    title: "CEO & Founder",
+    company: "Innovate Nigeria",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.7,
+    verified: true,
+    mutualConnections: 15,
+    category: "entrepreneurs",
+    profession: "Entrepreneur",
+  },
+  {
+    id: "5",
+    name: "Ibrahim Musa",
+    title: "Full Stack Developer",
+    company: "CodeCraft Ltd",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.5,
+    verified: false,
+    mutualConnections: 3,
+    category: "developers",
+    profession: "Full Stack Developer",
+  },
+  {
+    id: "6",
+    name: "Amara Eze",
+    title: "Product Designer",
+    company: "Design Hub",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.8,
+    verified: true,
+    mutualConnections: 10,
+    category: "designers",
+    profession: "Product Designer",
+  },
+  {
+    id: "7",
+    name: "David Okoro",
+    title: "Content Strategist",
+    company: "Wordsmith Agency",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.4,
+    verified: true,
+    mutualConnections: 7,
+    category: "writers",
+    profession: "Content Strategist",
+  },
+  {
+    id: "8",
+    name: "Blessing Nwosu",
+    title: "Startup Founder",
+    company: "TechVenture Inc",
+    image: "/placeholder-user.jpg",
+    trustScore: 4.9,
+    verified: true,
+    mutualConnections: 20,
+    category: "entrepreneurs",
+    profession: "Startup Founder",
+  },
+]

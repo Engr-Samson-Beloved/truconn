@@ -120,7 +120,24 @@ export default function ConnectPage() {
         >
           {filteredUsers.map((user) => (
             <motion.div key={user.id} variants={itemVariants}>
-              <UserCard user={user} />
+              <UserCard
+                id={user.id}
+                name={user.name}
+                title={user.title}
+                company={user.company}
+                image={user.image}
+                trustScore={user.trustScore}
+                verified={user.verified}
+                mutualConnections={user.mutualConnections}
+                onConnect={(id) => {
+                  // Handle connect action
+                  console.log("Connect with user:", id)
+                }}
+                onMessage={(id) => {
+                  // Handle message action
+                  console.log("Message user:", id)
+                }}
+              />
             </motion.div>
           ))}
         </motion.div>
