@@ -179,3 +179,11 @@ Through transparency, consent, and compliance automation, it redefines how digit
 👤 **[Your Name / Team Name]**  
 Pro Full-Stack Engineer | Next.js & Django Specialist  
 📍 Nigeria | 🌐 Global Hackathon Challenge
+
+
+
+
+
+**Backend Url**
+#Login --- https://truconn.onrender.com/api/auth/login/ 
+#Signup --- https://truconn.onrender.com/api/auth/signup/ 
