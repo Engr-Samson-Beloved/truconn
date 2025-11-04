@@ -1,16 +1,20 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
+import { AuthAPI } from "@/lib/auth/api"
+import { useAuth } from "@/lib/auth/context"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -22,11 +26,34 @@ export default function LoginPage() {
     setError("")
     setIsLoading(true)
 
-    // Simulate login - replace with actual auth
-    setTimeout(() => {
+    try {
+      const response = await AuthAPI.login({ email, password })
+      
+      if (response.user) {
+        // Map backend user role to match frontend expectations
+        const userData = {
+          ...response.user,
+          role: response.user.role?.toLowerCase() || "citizen",
+        }
+        login(userData)
+        
+        // Check for redirect parameter
+        const redirectTo = searchParams.get("redirect")
+        if (redirectTo) {
+          router.push(redirectTo)
+        } else {
+          // Redirect based on role
+          if (userData.role === "organization" || userData.role === "ORGANIZATION") {
+            router.push("/admin/organization")
+          } else {
+            router.push("/dashboard")
+          }
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.")
       setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+    }
   }
 
   return (
@@ -139,5 +166,25 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-light to-primary flex items-center justify-center p-4">
+        <div className="w-full max-w-md relative z-10 animate-fade-in">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center shadow-2xl mb-4">
+              <span className="text-2xl font-bold text-primary">✓</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">TruCon</h1>
+            <p className="text-white/80">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

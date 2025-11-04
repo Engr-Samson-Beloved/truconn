@@ -1,12 +1,20 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, FileCheck, Database, Shield, FileText, Settings, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth/context"
 
 export function OrganizationSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
+  }
 
   const navItems = [
     { href: "/admin/organization", label: "Dashboard Overview", icon: LayoutDashboard },
@@ -54,7 +62,10 @@ export function OrganizationSidebar() {
 
       {/* Logout */}
       <div className="p-4 border-t border-neutral-200">
-        <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>

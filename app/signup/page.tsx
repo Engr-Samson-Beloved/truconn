@@ -9,9 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react"
+import { AuthAPI } from "@/lib/auth/api"
+import { useAuth } from "@/lib/auth/context"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [activeTab, setActiveTab] = useState("login")
   const [formData, setFormData] = useState({
     name: "",
@@ -62,14 +65,50 @@ export default function SignUpPage() {
 
     setIsLoading(true)
 
-    setTimeout(() => {
-      setIsLoading(false)
-      if (formData.role === "citizen") {
-        router.push("/onboarding")
-      } else {
-        router.push("/admin/organization")
+    try {
+      // Split full name into first_name and last_name
+      const nameParts = formData.name.trim().split(/\s+/)
+      const first_name = nameParts[0] || ""
+      const last_name = nameParts.slice(1).join(" ") || nameParts[0] || ""
+
+      // Map frontend role to backend role format
+      const user_role = formData.role.toUpperCase() === "ORGANIZATION" ? "ORGANIZATION" : "CITIZEN"
+
+      const signupData = {
+        first_name,
+        last_name,
+        email: formData.email,
+        password1: formData.password,
+        password2: formData.confirmPassword,
+        user_role: user_role as "CITIZEN" | "ORGANIZATION",
       }
-    }, 800)
+
+      const response = await AuthAPI.signup(signupData)
+
+      if (response.user) {
+        // Map backend user to frontend format
+        // Backend returns user_role field, and id should be included as primary key
+        const userData = {
+          id: String(response.user.id || ""), // Ensure id is a string
+          first_name: response.user.first_name || first_name,
+          last_name: response.user.last_name || last_name,
+          email: response.user.email,
+          role: (response.user.user_role || formData.role).toLowerCase(),
+        }
+
+        login(userData)
+
+        // Redirect based on role
+        if (formData.role === "citizen") {
+          router.push("/onboarding")
+        } else {
+          router.push("/admin/organization")
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Signup failed. Please try again.")
+      setIsLoading(false)
+    }
   }
 
   return (
