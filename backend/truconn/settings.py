@@ -66,10 +66,11 @@ WSGI_APPLICATION = 'truconn.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
 DATABASES = {
-    'default': dj_database_url.config('DATABASES')
-        
+    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
 }
+
 
 
 # Password validation
