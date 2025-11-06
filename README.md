@@ -249,3 +249,15 @@ Response (201 created)
 
 **Profile**
 GET /api/auth/profile/
+--------------------------------------------------------------------------------------------------
+**Updating profile**
+PUT /api/auth/profile
+--------------------------------------------------------------------------------------------------
+
+## **Consent Management**
+GET /api/consents/ 
+**It lists all available consent categories**
+----------------------------------------------------------------------------------------------------
+
+POST /api/consents/consent_id/toggle/
+**Authenticated users can grant or revoke consent**

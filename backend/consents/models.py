@@ -3,13 +3,19 @@ from django.conf import settings
 
 class Consent(models.Model):
     name = models.CharField(max_length=50)
-    access = models.BooleanField(default=False)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='consents'
-    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} ({'Granted' if self.access else 'Denied'})"
+        return self.name
+    
+
+class UserConsent(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_consents')
+    consent = models.ForeignKey(Consent, on_delete=models.CASCADE)
+    access = models.BooleanField(default=False)  # True = granted, False = revoked
+
+    class Meta:
+        unique_together = ('user', 'consent')
+    
+    
