@@ -7,7 +7,7 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email must be specified!')
-        self.normalize_email(email)
+        email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -42,8 +42,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('ORGANIZATION', 'organization'), 
     )
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    first_name = models.CharField(max_length=25, blank=False, null=False)
-    last_name = models.CharField(max_length=25, blank=False, null=False)
+    first_name = models.CharField(max_length=25, blank=True, null=True)
+    last_name = models.CharField(max_length=25, blank=True, null=True)
+
     email = models.EmailField(unique=True)
     user_role = models.CharField(max_length=12, choices=USER_ROLE_CHOICES, default='CITIZEN')
     is_active = models.BooleanField(default=True)

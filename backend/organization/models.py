@@ -12,7 +12,7 @@ class Org(models.Model):
     name = models.CharField(max_length=100, unique=True)
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
-
+    address = models.CharField(max_length=700)
     def __str__(self):
         return self.name
 
