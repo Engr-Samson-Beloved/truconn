@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings 
 
 class Org(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'user_role': 'organization'}, null=True
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,limit_choices_to={'user_role': 'organization'}
 )
 
     name = models.CharField(max_length=100, unique=True)
