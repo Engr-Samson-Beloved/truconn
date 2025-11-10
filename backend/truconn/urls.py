@@ -8,7 +8,7 @@ urlpatterns = [
     path('api/auth/', include('accounts.urls')),
     path('api/', include('consents.urls')),
     path('api/organization/', include('organization.urls')),
-    path(" ", health_check),
+    path("health/", health_check),
 
 ]
 if settings.DEBUG:  # new
