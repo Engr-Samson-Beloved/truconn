@@ -239,7 +239,7 @@ export default function SignUpPage() {
                         <Input
                           type="text"
                           name="name"
-                          placeholder="Acme Corporation"
+                          placeholder="Samixtech Solutions"
                           value={formData.name}
                           onChange={handleChange}
                           required
@@ -255,7 +255,7 @@ export default function SignUpPage() {
                     <Input
                       type="email"
                       name="email"
-                      placeholder="you@example.com"
+                      placeholder="samixtech@example.com"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -272,7 +272,7 @@ export default function SignUpPage() {
                         <Input
                           type="url"
                           name="website"
-                          placeholder="https://www.example.com"
+                          placeholder="https://www.companyadress.com"
                           value={formData.website}
                           onChange={handleChange}
                           className="w-full"
@@ -285,7 +285,7 @@ export default function SignUpPage() {
                         <Input
                           type="text"
                           name="address"
-                          placeholder="123 Main Street, City, State, ZIP"
+                          placeholder="123 Mainland, City, State, ZIP"
                           value={formData.address}
                           onChange={handleChange}
                           required

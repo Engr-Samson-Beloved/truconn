@@ -1,17 +1,83 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CitizenSidebar } from "@/components/citizen-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ConsentToggle } from "@/components/consent-toggle"
 import { Badge } from "@/components/ui/badge"
-import { mockConsents } from "@/lib/mock-data"
+import { ConsentsAPI, type Consent } from "@/lib/consents/api"
+import { AlertCircle } from "lucide-react"
+
+interface ConsentWithStatus extends Consent {
+  allowed: boolean
+  organizations: string[]
+  duration: string
+  details: string
+}
 
 export default function ConsentManagementPage() {
-  const [consents, setConsents] = useState(mockConsents)
+  const [consents, setConsents] = useState<ConsentWithStatus[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const handleToggle = (id: string, allowed: boolean) => {
-    setConsents((prev) => prev.map((c) => (c.id === id ? { ...c, allowed } : c)))
+  useEffect(() => {
+    loadConsents()
+  }, [])
+
+  const loadConsents = async () => {
+    try {
+      setIsLoading(true)
+      setError("")
+      const consentCategories = await ConsentsAPI.getConsents()
+      
+      // Map backend consents to frontend format
+      // Note: We don't have user consent status from the initial fetch,
+      // so we'll initialize all as false and update when toggled
+      const mappedConsents: ConsentWithStatus[] = consentCategories.map((consent) => ({
+        ...consent,
+        allowed: false, // Will be updated when we fetch user consents or toggle
+        organizations: [],
+        duration: "Ongoing",
+        details: `Manage access to your ${consent.name.toLowerCase()} data`,
+      }))
+      
+      setConsents(mappedConsents)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load consents")
+      console.error("Error loading consents:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleToggle = async (id: number, newAllowed: boolean) => {
+    const consent = consents.find((c) => c.id === id)
+    if (!consent) return
+
+    const previousAllowed = consent.allowed
+
+    try {
+      setError("")
+      // Optimistically update UI
+      setConsents((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, allowed: newAllowed } : c))
+      )
+
+      // Call API to toggle consent
+      const response = await ConsentsAPI.toggleConsent(id)
+      
+      // Update with actual response
+      setConsents((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, allowed: response.access } : c))
+      )
+    } catch (err) {
+      // Revert on error
+      setConsents((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, allowed: previousAllowed } : c))
+      )
+      setError(err instanceof Error ? err.message : "Failed to toggle consent")
+      console.error("Error toggling consent:", err)
+    }
   }
 
   return (
@@ -30,6 +96,18 @@ export default function ConsentManagementPage() {
         {/* Content */}
         <div className="p-6">
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* Error Message */}
+            {error && (
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-900">
+                    <AlertCircle className="w-5 h-5" />
+                    <p className="text-sm">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Info Card */}
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
@@ -40,23 +118,42 @@ export default function ConsentManagementPage() {
               </CardContent>
             </Card>
 
-            {/* Consent Categories */}
-            <div className="space-y-4">
-              {consents.map((consent) => (
-                <Card key={consent.id}>
-                  <CardContent className="pt-6">
-                    <ConsentToggle
-                      category={consent.category}
-                      allowed={consent.allowed}
-                      onToggle={(allowed) => handleToggle(consent.id, allowed)}
-                      details={consent.details}
-                      organizations={consent.organizations}
-                      duration={consent.duration}
-                    />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* Loading State */}
+            {isLoading ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-neutral-500">Loading consents...</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Consent Categories */}
+                {consents.length === 0 ? (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <p className="text-center text-neutral-500">No consent categories available</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {consents.map((consent) => (
+                      <Card key={consent.id}>
+                        <CardContent className="pt-6">
+                          <ConsentToggle
+                            category={consent.name as "Financial" | "Biometric" | "Health" | "Identity"}
+                            allowed={consent.allowed}
+                            onToggle={(allowed) => handleToggle(consent.id, allowed)}
+                            details={consent.details}
+                            organizations={consent.organizations}
+                            duration={consent.duration}
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Summary */}
             <Card>

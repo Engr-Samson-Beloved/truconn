@@ -50,6 +50,25 @@ export interface SignupResponse {
   }
 }
 
+export interface Profile {
+  id: number
+  user: string
+  title: string
+  company: string
+  url: string
+  phone_no: string
+  about: string
+  profile_pic: string | null
+}
+
+export interface UpdateProfileData {
+  title?: string
+  company?: string
+  url?: string
+  phone_no?: string
+  about?: string
+}
+
 export class AuthAPI {
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
@@ -140,6 +159,100 @@ export class AuthAPI {
       // Handle network/CORS errors
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection and ensure the backend is running.")
+      }
+      throw error
+    }
+  }
+
+  /**
+   * Get user profile
+   * GET /api/auth/profile/
+   */
+  static async getProfile(): Promise<Profile> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies for session auth
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Please log in to view your profile")
+        }
+        if (response.status === 502) {
+          throw new Error("Backend service is currently unavailable. Please try again later.")
+        }
+        
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch {
+          throw new Error(`Failed to fetch profile: ${response.status}`)
+        }
+        
+        const errorMessage = errorData.error || errorData.detail || errorData.message || "Failed to fetch profile"
+        throw new Error(errorMessage)
+      }
+
+      return await response.json()
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        throw new Error("Failed to connect to server. Please check your internet connection.")
+      }
+      throw error
+    }
+  }
+
+  /**
+   * Update user profile
+   * PUT /api/auth/profile/
+   */
+  static async updateProfile(data: UpdateProfileData): Promise<Profile> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include", // Include cookies for session auth
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Please log in to update your profile")
+        }
+        if (response.status === 502) {
+          throw new Error("Backend service is currently unavailable. Please try again later.")
+        }
+        
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch {
+          throw new Error(`Failed to update profile: ${response.status}`)
+        }
+        
+        const errorMessage = 
+          errorData.title?.[0] ||
+          errorData.company?.[0] ||
+          errorData.url?.[0] ||
+          errorData.phone_no?.[0] ||
+          errorData.about?.[0] ||
+          errorData.error || 
+          errorData.detail || 
+          errorData.message || 
+          "Failed to update profile"
+        throw new Error(errorMessage)
+      }
+
+      return await response.json()
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        throw new Error("Failed to connect to server. Please check your internet connection.")
       }
       throw error
     }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CitizenSidebar } from "@/components/citizen-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,32 +14,113 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { Search, X, FileEdit } from "lucide-react"
-import { mockDataAccess } from "@/lib/mock-data"
+import { Search, X, FileEdit, AlertCircle } from "lucide-react"
+import { OrganizationAPI, type AccessRequest } from "@/lib/organization/api"
+import { ConsentsAPI } from "@/lib/consents/api"
+
+interface DataAccessItem {
+  id: number
+  organizationId: number
+  organizationName: string
+  dataType: string
+  lastAccessed: string
+  purpose: string
+  status: "active" | "revoked" | "pending"
+  consentId: number
+}
 
 export default function DataAccessPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "revoked">("all")
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "revoked" | "pending">("all")
+  const [dataAccess, setDataAccess] = useState<DataAccessItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [consentMap, setConsentMap] = useState<Record<number, string>>({})
 
-  const filteredData = mockDataAccess.filter((item) => {
+  useEffect(() => {
+    const initialize = async () => {
+      await loadConsents()
+      await loadDataAccess()
+    }
+    initialize()
+  }, [])
+
+  const loadConsents = async () => {
+    try {
+      const consents = await ConsentsAPI.getConsents()
+      const map: Record<number, string> = {}
+      consents.forEach((consent) => {
+        map[consent.id] = consent.name
+      })
+      setConsentMap(map)
+      return map
+    } catch (err) {
+      console.error("Error loading consents:", err)
+      return {}
+    }
+  }
+
+  const loadDataAccess = async () => {
+    try {
+      setIsLoading(true)
+      setError("")
+      
+      // Ensure consents are loaded
+      const map = Object.keys(consentMap).length > 0 ? consentMap : await loadConsents()
+      
+      const response = await OrganizationAPI.getRequestedConsents()
+      
+      // Map backend AccessRequest to frontend DataAccessItem
+      const mappedData: DataAccessItem[] = response.data.map((request: AccessRequest) => ({
+        id: request.id,
+        organizationId: request.organization,
+        organizationName: `Organization ${request.organization}`, // Will be enhanced when backend includes org name
+        dataType: map[request.consent] || `Consent ${request.consent}`,
+        lastAccessed: request.requested_at,
+        purpose: request.purpose || "Data access request",
+        status: request.status === "APPROVED" ? "active" : request.status === "REVOKED" ? "revoked" : "pending",
+        consentId: request.consent,
+      }))
+      
+      setDataAccess(mappedData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data access requests")
+      console.error("Error loading data access:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filteredData = dataAccess.filter((item) => {
     const matchesSearch =
       item.organizationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.dataType.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.purpose.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesStatus = selectedStatus === "all" || item.status === selectedStatus
+    const matchesStatus = 
+      selectedStatus === "all" || 
+      (selectedStatus === "active" && item.status === "active") ||
+      (selectedStatus === "revoked" && item.status === "revoked") ||
+      (selectedStatus === "pending" && item.status === "pending")
 
     return matchesSearch && matchesStatus
   })
 
-  const handleRevoke = (id: string) => {
-    console.log("Revoking access:", id)
-    // Implement revoke logic
+  const handleRevoke = async (id: number) => {
+    try {
+      setError("")
+      await OrganizationAPI.toggleAccess(id)
+      // Reload data to get updated status
+      await loadDataAccess()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to toggle access")
+      console.error("Error toggling access:", err)
+    }
   }
 
-  const handleModify = (id: string) => {
+  const handleModify = (id: number) => {
+    // TODO: Implement modify logic (might need a separate endpoint or modal)
     console.log("Modifying consent:", id)
-    // Implement modify logic
   }
 
   return (
@@ -73,7 +154,7 @@ export default function DataAccessPage() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    {(["all", "active", "revoked"] as const).map((status) => (
+                    {(["all", "active", "revoked", "pending"] as const).map((status) => (
                       <Button
                         key={status}
                         variant={selectedStatus === status ? "default" : "outline"}
@@ -88,78 +169,103 @@ export default function DataAccessPage() {
               </CardContent>
             </Card>
 
+            {/* Error Message */}
+            {error && (
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-900">
+                    <AlertCircle className="w-5 h-5" />
+                    <p className="text-sm">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Table */}
             <Card>
               <CardHeader>
                 <CardTitle>Data Access Requests</CardTitle>
                 <CardDescription>
-                  {filteredData.length} organization{filteredData.length !== 1 ? "s" : ""} with access to your data
+                  {isLoading
+                    ? "Loading..."
+                    : `${filteredData.length} organization${filteredData.length !== 1 ? "s" : ""} with access to your data`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Organization Name</TableHead>
-                      <TableHead>Data Type</TableHead>
-                      <TableHead>Last Accessed</TableHead>
-                      <TableHead>Purpose</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredData.length === 0 ? (
+                {isLoading ? (
+                  <div className="text-center py-8 text-neutral-500">Loading data access requests...</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-neutral-500">
-                          No data access records found
-                        </TableCell>
+                        <TableHead>Organization Name</TableHead>
+                        <TableHead>Data Type</TableHead>
+                        <TableHead>Requested At</TableHead>
+                        <TableHead>Purpose</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      filteredData.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-semibold">{item.organizationName}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{item.dataType}</Badge>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-neutral-500">
+                            No data access records found
                           </TableCell>
-                          <TableCell className="text-sm text-neutral-500">
-                            {new Date(item.lastAccessed).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="text-sm">{item.purpose}</TableCell>
-                          <TableCell>
-                            <Badge variant={item.status === "active" ? "success" : "destructive"}>
-                              {item.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              {item.status === "active" && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleModify(item.id)}
-                                  >
-                                    <FileEdit className="w-4 h-4 mr-1" />
-                                    Modify
-                                  </Button>
+                        </TableRow>
+                      ) : (
+                        filteredData.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-semibold">{item.organizationName}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{item.dataType}</Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-neutral-500">
+                              {new Date(item.lastAccessed).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-sm">{item.purpose}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  item.status === "active"
+                                    ? "success"
+                                    : item.status === "pending"
+                                      ? "warning"
+                                      : "destructive"
+                                }
+                              >
+                                {item.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                {(item.status === "active" || item.status === "pending") && (
                                   <Button
                                     variant="destructive"
                                     size="sm"
                                     onClick={() => handleRevoke(item.id)}
                                   >
                                     <X className="w-4 h-4 mr-1" />
-                                    Revoke
+                                    {item.status === "pending" ? "Reject" : "Revoke"}
                                   </Button>
-                                </>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                                )}
+                                {item.status === "pending" && (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() => handleRevoke(item.id)}
+                                  >
+                                    Approve
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -8,8 +8,9 @@ import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { Edit2, Save, X, MapPin, Mail, Phone, LinkIcon, Shield, Star } from "lucide-react"
+import { Edit2, Save, X, MapPin, Mail, Phone, LinkIcon, Shield, Star, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth/context"
+import { AuthAPI } from "@/lib/auth/api"
 
 export default function ProfilePage() {
   const { user, isLoading, isAuthenticated } = useAuth()
@@ -34,42 +35,92 @@ export default function ProfilePage() {
   })
 
   const [editData, setEditData] = useState(profileData)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+  const [error, setError] = useState("")
 
-  // Update profile data when user data is available
+  // Load profile data from API
   useEffect(() => {
-    if (user) {
+    if (user && isAuthenticated) {
+      loadProfile()
+    }
+  }, [user, isAuthenticated])
+
+  const loadProfile = async () => {
+    try {
+      setIsLoadingProfile(true)
+      setError("")
+      const profile = await AuthAPI.getProfile()
+      
+      // Map backend profile to frontend format
       setProfileData({
-        firstName: user.first_name || "",
-        lastName: user.last_name || "",
-        title: "",
-        company: "",
-        location: "",
-        email: user.email || "",
-        phone: "",
-        website: "",
-        bio: "",
-        verified: user.role === "organization" || user.role === "ORGANIZATION",
+        firstName: user?.first_name || "",
+        lastName: user?.last_name || "",
+        title: profile.title || "",
+        company: profile.company || "",
+        location: "", // Not in backend profile
+        email: user?.email || "",
+        phone: profile.phone_no || "",
+        website: profile.url || "",
+        bio: profile.about || "",
+        verified: user?.role === "organization" || user?.role === "ORGANIZATION",
         trustScore: 4.5,
         connections: 0,
         views: 0,
       })
       setEditData({
-        firstName: user.first_name || "",
-        lastName: user.last_name || "",
-        title: "",
-        company: "",
+        firstName: user?.first_name || "",
+        lastName: user?.last_name || "",
+        title: profile.title || "",
+        company: profile.company || "",
         location: "",
-        email: user.email || "",
-        phone: "",
-        website: "",
-        bio: "",
-        verified: user.role === "organization" || user.role === "ORGANIZATION",
+        email: user?.email || "",
+        phone: profile.phone_no || "",
+        website: profile.url || "",
+        bio: profile.about || "",
+        verified: user?.role === "organization" || user?.role === "ORGANIZATION",
         trustScore: 4.5,
         connections: 0,
         views: 0,
       })
+    } catch (err) {
+      // If profile doesn't exist, use user data only
+      if (user) {
+        setProfileData({
+          firstName: user.first_name || "",
+          lastName: user.last_name || "",
+          title: "",
+          company: "",
+          location: "",
+          email: user.email || "",
+          phone: "",
+          website: "",
+          bio: "",
+          verified: user.role === "organization" || user.role === "ORGANIZATION",
+          trustScore: 4.5,
+          connections: 0,
+          views: 0,
+        })
+        setEditData({
+          firstName: user.first_name || "",
+          lastName: user.last_name || "",
+          title: "",
+          company: "",
+          location: "",
+          email: user.email || "",
+          phone: "",
+          website: "",
+          bio: "",
+          verified: user.role === "organization" || user.role === "ORGANIZATION",
+          trustScore: 4.5,
+          connections: 0,
+          views: 0,
+        })
+      }
+      console.error("Error loading profile:", err)
+    } finally {
+      setIsLoadingProfile(false)
     }
-  }, [user])
+  }
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -84,11 +135,31 @@ export default function ProfilePage() {
     setEditData({ ...profileData })
   }
 
-  const handleSave = () => {
-    // TODO: Save profile data to backend API
-    setProfileData(editData)
-    setIsEditing(false)
-    // Here you would typically make an API call to update the profile
+  const handleSave = async () => {
+    try {
+      setError("")
+      setIsLoadingProfile(true)
+      
+      // Map frontend format to backend format
+      const updateData = {
+        title: editData.title || "",
+        company: editData.company || "",
+        url: editData.website || "",
+        phone_no: editData.phone || "",
+        about: editData.bio || "",
+      }
+      
+      await AuthAPI.updateProfile(updateData)
+      
+      // Update local state
+      setProfileData(editData)
+      setIsEditing(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update profile")
+      console.error("Error updating profile:", err)
+    } finally {
+      setIsLoadingProfile(false)
+    }
   }
 
   const handleCancel = () => {
@@ -101,7 +172,7 @@ export default function ProfilePage() {
   }
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading || isLoadingProfile) {
     return (
       <div className="flex h-screen bg-neutral-50 items-center justify-center">
         <div className="text-center">
@@ -127,6 +198,15 @@ export default function ProfilePage() {
 
         <div className="px-6 pb-12">
           <div className="max-w-4xl mx-auto -mt-16 relative z-40">
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-900">
+                  <AlertCircle className="w-5 h-5" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+            )}
             {/* Profile Card */}
             <Card className="bg-white shadow-xl mb-8">
               <div className="p-8">
