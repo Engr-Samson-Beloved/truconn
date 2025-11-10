@@ -29,7 +29,7 @@ class AccessRequest(models.Model):
     consent = models.ForeignKey(Consent, on_delete=models.CASCADE, related_name='access_requests')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     requested_at = models.DateTimeField(auto_now_add=True)
-    purpose = models.CharField(max_length=40)
+    purpose = models.CharField(max_length=40, blank=False, null=False)
     class Meta:
         unique_together = ('organization', 'user', 'consent')
         ordering = ['-requested_at']

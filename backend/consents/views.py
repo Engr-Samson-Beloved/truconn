@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import ConsentSerializer, UserConsentSerializer
 from rest_framework import status
-
+from organization.models import AccessRequest
+from organization.serializers import AccessRequestSerializer
 
 class ConsentApiView(APIView):
     permission_classes = [IsAuthenticated]
@@ -32,3 +33,20 @@ class UserConsentView(APIView):
             'access': user_consent.access
         }, status=status.HTTP_200_OK)
     
+
+
+class CitizenTransparencyLog(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        access_requests = AccessRequest.objects.filter(user=request.user)
+
+        if not access_requests.exists():
+            return Response(
+                {"message": "No consent requests found for this user."},
+                status=status.HTTP_200_OK
+            )
+
+        serializer = AccessRequestSerializer(access_requests, many=True)
+        return Response({
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)

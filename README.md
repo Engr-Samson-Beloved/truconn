@@ -260,7 +260,7 @@ POST /api/consents/consent_id/toggle/
 
 
 
- POST /api/organization/consent/<uuid:user_id>/<int:consent_id>/request/
+POST /api/organization/consent/<uuid:user_id>/<int:consent_id>/request/
 **Organization sends a request for data access to a specified user as long as the user allows access to the data. But if the user doesn't allow access, it throws a 400 BAD Request and and error message: "error": "User has not granted this consent."**
 
 GET /api/organization/requested-consent/
@@ -268,3 +268,10 @@ GET /api/organization/requested-consent/
 
 POST /api/organization/consent/<int:access_id>/toggle-access/
 **Users can Approve or Revoke requests sent by organizations depending on its status**
+
+GET /api/organization/citizens/list/
+**A protected page for organizations only, to manage and review requests.** 
+
+
+GET /api/consents/transparency-log/
+**Lists all access requests made by organizations to the logged-in user**

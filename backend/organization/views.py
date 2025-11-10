@@ -4,7 +4,7 @@ from .models import AccessRequest, Org
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import AccessRequestSerializer, OrganizationSerializer
+from .serializers import AccessRequestSerializer, OrganizationSerializer, CitizenListSerializer
 from rest_framework import status
 from consents.models import Consent, UserConsent
 from accounts.models import CustomUser
@@ -62,6 +62,7 @@ class RequestedConsentView(APIView):
 
 
 class ConsentRevocationView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, access_id):
         access_requests = get_object_or_404(AccessRequest, pk=access_id, user=request.user)
         if access_requests.status != 'APPROVED':
@@ -75,3 +76,12 @@ class ConsentRevocationView(APIView):
             access_requests.save()
             access_requests_serializer = AccessRequestSerializer(access_requests)
             return Response({'message':'Consent Revoked!'})
+
+
+class CitizensListView(APIView):
+    permission_classes = [IsAuthenticated, IsOrganization]
+
+    def get(self, request):
+        citizens = CustomUser.objects.filter(user_role='CITIZEN')
+        serializer = CitizenListSerializer(citizens, many=True, context={'request': request})
+        return Response(serializer.data)
