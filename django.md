@@ -82,3 +82,6 @@ GET /api/organization/requested-consent/
 
 POST /api/organization/consent/<int:access_id>/toggle-access/
 **Users can Approve or Revoke requests sent by organizations depending on its status**
+
+GET /api/consents/transparency-log/
+**Lists all access requests made by organizations to the logged-in user**

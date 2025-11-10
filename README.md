@@ -274,7 +274,6 @@ GET /api/organization/citizens/list/
 **A protected page for organizations only, to manage and review requests.** 
 
 
-GET /api/consents/transparency-log/
-**Lists all access requests made by organizations to the logged-in user**
+
 =======
 >>>>>>> a78b8812f41563201f67fb82e7371dcf97c85a02
