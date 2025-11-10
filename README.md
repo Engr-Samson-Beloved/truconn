@@ -261,7 +261,7 @@ POST /api/consents/consent_id/toggle/
 
 
  POST /api/organization/consent/<uuid:user_id>/<int:consent_id>/request/
-**Organization sends a request for data access to a specified user as long as the user allows access to the data. But if the user doesn't allow access, it throws a 404 Not Found and and error message: "error": "User has not granted this consent."**
+**Organization sends a request for data access to a specified user as long as the user allows access to the data. But if the user doesn't allow access, it throws a 400 BAD Request and and error message: "error": "User has not granted this consent."**
 
 GET /api/organization/requested-consent/
 **Authenticated users can check to see which organization sent a request for data access**
