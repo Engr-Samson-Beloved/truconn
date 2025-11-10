@@ -180,6 +180,7 @@ Through transparency, consent, and compliance automation, it redefines how digit
 Pro Full-Stack Engineer | Next.js & Django Specialist  
 📍 Nigeria | 🌐 Global Hackathon Challenge
 
+<<<<<<< HEAD
 
 
 
@@ -275,3 +276,5 @@ GET /api/organization/citizens/list/
 
 GET /api/consents/transparency-log/
 **Lists all access requests made by organizations to the logged-in user**
+=======
+>>>>>>> a78b8812f41563201f67fb82e7371dcf97c85a02
