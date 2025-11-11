@@ -41,8 +41,8 @@ class AccessRequestSerializer(serializers.ModelSerializer):
         return obj.consent.id
 
     def get_lastAccessed(self, obj):
-        # You can map this to requested_at or actual last access
-        return obj.requested_at
+        return obj.requested_at.isoformat()
+
 
 
 class CitizenListSerializer(serializers.ModelSerializer):
