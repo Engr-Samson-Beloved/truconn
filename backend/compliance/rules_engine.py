@@ -224,20 +224,20 @@ class NDPRRulesEngine:
         for request in approved_requests:
             user_consent = UserConsent.objects.filter(
                 user=request.user,
-                consent=request.consent,
-                access=False  # User has revoked
+                consent=request.consent
             ).first()
             
-            if user_consent:
+            # CRITICAL: If no consent record exists OR consent is revoked (access=False)
+            if not user_consent or not user_consent.access:
                 violations.append({
                     'rule': 'REVOCATION_HANDLING',
                     'details': {
                         'access_request_id': request.id,
                         'user_id': request.user.id,
                         'consent_type': request.consent.name,
-                        'issue': 'CRITICAL: Access still approved after user revoked consent',
+                        'issue': 'CRITICAL: Access still approved but user consent is missing or revoked',
                     },
-                    'recommendation': f'IMMEDIATELY revoke access request #{request.id} - user has revoked consent',
+                    'recommendation': f'IMMEDIATELY revoke access request #{request.id} - user consent is missing or revoked',
                 })
         
         return violations

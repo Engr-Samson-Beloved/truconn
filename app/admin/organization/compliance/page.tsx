@@ -76,6 +76,17 @@ export default function ComplianceScannerPage() {
     }
   }
 
+  const handleUpdateAuditStatus = async (auditId: number, newStatus: string) => {
+    try {
+      await ComplianceAPI.updateAuditStatus(auditId, newStatus)
+      // Reload compliance data to reflect the change
+      await loadComplianceData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update audit status")
+      console.error("Error updating audit status:", err)
+    }
+  }
+
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case "CRITICAL":
@@ -265,6 +276,26 @@ export default function ComplianceScannerPage() {
                         {Object.keys(audit.details || {}).length > 0 && (
                           <div className="ml-8 mt-2 text-xs text-neutral-500">
                             Detected: {new Date(audit.detected_at).toLocaleString()}
+                          </div>
+                        )}
+                        {audit.status !== "RESOLVED" && (
+                          <div className="ml-8 mt-3 flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUpdateAuditStatus(audit.id, "RESOLVED")}
+                              className="text-xs"
+                            >
+                              Mark as Resolved
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleUpdateAuditStatus(audit.id, "INVESTIGATING")}
+                              className="text-xs"
+                            >
+                              Mark as Investigating
+                            </Button>
                           </div>
                         )}
                       </div>
