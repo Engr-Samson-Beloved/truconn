@@ -40,6 +40,7 @@ class ConsentRequestView(APIView):
             "data": serializer.data
         }, status=status.HTTP_200_OK)
 
+#Authenticated users can check to see which organization sent a request for data access
 class RequestedConsentView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -60,7 +61,7 @@ class RequestedConsentView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-
+#users can choose to approve or revoke organization's request
 class ConsentRevocationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, access_id):
