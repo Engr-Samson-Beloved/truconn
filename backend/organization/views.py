@@ -13,7 +13,7 @@ from .send_mail import send_access_request_email
 
 
 class ConsentRequestView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganization]
+    permission_classes = [AllowAny, IsOrganization]
     def post(self, request, consent_id, user_id):
         target_user = get_object_or_404(CustomUser, pk=user_id, user_role='CITIZEN')
         consent = get_object_or_404(Consent, pk=consent_id)
@@ -43,7 +43,7 @@ class ConsentRequestView(APIView):
 
 
 class RequestedConsentView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         access_requests = AccessRequest.objects.filter(user=request.user)
@@ -80,7 +80,7 @@ class ConsentRevocationView(APIView):
 
 
 class CitizensListView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganization]
+    permission_classes = [AllowAny, IsOrganization]
 
     def get(self, request):
         citizens = CustomUser.objects.filter(user_role='CITIZEN')
