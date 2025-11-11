@@ -40,17 +40,16 @@ class ConsentRequestView(APIView):
             "data": serializer.data
         }, status=status.HTTP_200_OK)
 
-
-
+#Authenticated users can check to see which organization sent a request for data access
 class RequestedConsentView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         access_requests = AccessRequest.objects.filter(user=request.user)
 
         if not access_requests.exists():
             return Response(
-                {"message": "No consent requests found for this user."},
+                {"message": "No consent requests found."},
                 status=status.HTTP_200_OK
             )
 
@@ -62,6 +61,7 @@ class RequestedConsentView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+#users can choose to approve or revoke organization's request
 class ConsentRevocationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, access_id):
@@ -79,10 +79,29 @@ class ConsentRevocationView(APIView):
             return Response({'message':'Consent Revoked!'})
 
 
-class CitizensListView(APIView):
+class OrganizationAccessLog(APIView):
     permission_classes = [IsAuthenticated, IsOrganization]
 
     def get(self, request):
-        citizens = CustomUser.objects.filter(user_role='CITIZEN')
-        serializer = CitizenListSerializer(citizens, many=True, context={'request': request})
-        return Response(serializer.data)
+        org = get_object_or_404(Org, user=request.user)
+
+        access_requests = AccessRequest.objects.filter(organization=org)
+
+        if not access_requests.exists():
+            return Response(
+                {"message": "You have not requested consent from any citizen."},
+                status=status.HTTP_200_OK
+            )
+
+        citizens = CustomUser.objects.filter(
+            id__in=access_requests.values_list("user_id", flat=True),
+            user_role="CITIZEN"
+        )
+
+        serializer = CitizenListSerializer(
+            citizens, 
+            many=True,
+            context={'request': request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
