@@ -40,17 +40,16 @@ class ConsentRequestView(APIView):
             "data": serializer.data
         }, status=status.HTTP_200_OK)
 
-
-
+#Authenticated users can check to see which organization sent a request for data access
 class RequestedConsentView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         access_requests = AccessRequest.objects.filter(user=request.user)
 
         if not access_requests.exists():
             return Response(
-                {"message": "No consent requests found for this user."},
+                {"message": "No consent requests found."},
                 status=status.HTTP_200_OK
             )
 
@@ -62,6 +61,7 @@ class RequestedConsentView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+#citizens can choose to approve or revoke org requests
 class ConsentRevocationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, access_id):
