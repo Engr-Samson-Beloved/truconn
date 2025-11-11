@@ -36,8 +36,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -167,5 +168,12 @@ CORS_ALLOW_CREDENTIALS = True
 # Allow preflight requests
 CORS_PREFLIGHT_MAX_AGE = 86400
 
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "None"
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"
 
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
