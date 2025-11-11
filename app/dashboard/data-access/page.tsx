@@ -82,9 +82,10 @@ export default function DataAccessPage() {
       const map = Object.keys(consentMap).length > 0 ? consentMap : await loadConsents()
       
       const response = await OrganizationAPI.getRequestedConsents()
+      const list: AccessRequest[] = Array.isArray((response as any)?.data) ? (response as any).data : (Array.isArray(response) ? (response as any) : [])
       
       // Map backend AccessRequest to frontend DataAccessItem
-      const mappedData: DataAccessItem[] = response.data.map((request: AccessRequest) => ({
+      const mappedData: DataAccessItem[] = list.map((request: AccessRequest) => ({
         id: request.id,
         organizationId: request.organization,
         organizationName: `Organization ${request.organization}`, // Will be enhanced when backend includes org name

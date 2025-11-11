@@ -75,28 +75,12 @@ export interface UpdateProfileData {
 }
 
 export class AuthAPI {
-  static async ensureCsrf(): Promise<void> {
-    try {
-      await fetch(`${API_BASE_URL}/csrf/`, {
-        method: "GET",
-        credentials: "include",
-      })
-    } catch {
-      // ignore; endpoint is best-effort to set cookie
-    }
-  }
-
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      // Ensure a CSRF cookie exists before POST
-      await AuthAPI.ensureCsrf()
-
       const response = await fetch(`${API_BASE_URL}/login/`, {
         method: "POST",
         headers: getApiHeaders(),
         body: JSON.stringify(credentials),
-        // Include cookies for session authentication
-        credentials: "include",
       })
 
       // Handle network errors
@@ -134,15 +118,10 @@ export class AuthAPI {
 
   static async signup(data: SignupData): Promise<SignupResponse> {
     try {
-      // Ensure a CSRF cookie exists before POST
-      await AuthAPI.ensureCsrf()
-
       const response = await fetch(`${API_BASE_URL}/signup/`, {
         method: "POST",
         headers: getApiHeaders(),
         body: JSON.stringify(data),
-        // Include cookies for session authentication
-        credentials: "include",
       })
 
       // Handle network errors
@@ -192,7 +171,6 @@ export class AuthAPI {
       const response = await fetch(`${API_BASE_URL}/profile/`, {
         method: "GET",
         headers: getApiHeaders(),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
@@ -233,7 +211,6 @@ export class AuthAPI {
         method: "PUT",
         headers: getApiHeaders(),
         body: JSON.stringify(data),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
@@ -279,12 +256,9 @@ export class AuthAPI {
    */
   static async logout(): Promise<void> {
     try {
-      // Ensure CSRF cookie exists for POST
-      await AuthAPI.ensureCsrf()
       const response = await fetch(`${API_BASE_URL}/logout/`, {
         method: "POST",
         headers: getApiHeaders(),
-        credentials: "include",
       })
       if (!response.ok) {
         throw new Error("Failed to log out")

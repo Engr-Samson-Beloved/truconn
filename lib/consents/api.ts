@@ -24,7 +24,6 @@ export class ConsentsAPI {
       const response = await fetch(`${API_BASE_URL}/consents/`, {
         method: "GET",
         headers: getApiHeaders(),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
@@ -64,7 +63,6 @@ export class ConsentsAPI {
       const response = await fetch(`${API_BASE_URL}/consents/transparency-log/`, {
         method: "GET",
         headers: getApiHeaders(),
-        credentials: "include",
       })
 
       if (!response.ok) {
@@ -104,7 +102,6 @@ export class ConsentsAPI {
       const response = await fetch(`${API_BASE_URL}/consents/${consentId}/toggle/`, {
         method: "POST",
         headers: getApiHeaders(),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {

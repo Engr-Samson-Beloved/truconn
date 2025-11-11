@@ -63,7 +63,6 @@ export class OrganizationAPI {
       const response = await fetch(`${API_BASE_URL}/organization/requested-consent/`, {
         method: "GET",
         headers: getApiHeaders(),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
@@ -104,7 +103,6 @@ export class OrganizationAPI {
         method: "POST",
         headers: getApiHeaders(),
         body: JSON.stringify({ purpose }),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
@@ -156,7 +154,6 @@ export class OrganizationAPI {
       const response = await fetch(`${API_BASE_URL}/organization/consent/${accessId}/toggle-access/`, {
         method: "POST",
         headers: getApiHeaders(),
-        credentials: "include", // Include cookies for session auth
       })
 
       if (!response.ok) {
