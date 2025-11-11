@@ -9,7 +9,7 @@ from organization.models import AccessRequest
 from organization.serializers import AccessRequestSerializer
 
 class ConsentApiView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         consent = Consent.objects.all()
         consent_serializer = ConsentSerializer(consent, many=True)
@@ -17,10 +17,9 @@ class ConsentApiView(APIView):
 
 
 class UserConsentView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def post(self, request, consent_id):
-        if not request.user.is_authenticated:
-            return Response({"error": "Please log in to manage consents"}, status=status.HTTP_401_UNAUTHORIZED)
+        
         consent = get_object_or_404(Consent, pk=consent_id)
         user_consent, created = UserConsent.objects.get_or_create(
             consent=consent,
@@ -39,7 +38,7 @@ class UserConsentView(APIView):
 
 
 class CitizenTransparencyLog(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         access_requests = AccessRequest.objects.filter(user=request.user)
 
