@@ -79,10 +79,29 @@ class ConsentRevocationView(APIView):
             return Response({'message':'Consent Revoked!'})
 
 
-class CitizensListView(APIView):
+class OrganizationAccessLog(APIView):
     permission_classes = [IsAuthenticated, IsOrganization]
 
     def get(self, request):
-        citizens = CustomUser.objects.filter(user_role='CITIZEN')
-        serializer = CitizenListSerializer(citizens, many=True, context={'request': request})
-        return Response(serializer.data)
+        org = get_object_or_404(Org, user=request.user)
+
+        access_requests = AccessRequest.objects.filter(organization=org)
+
+        if not access_requests.exists():
+            return Response(
+                {"message": "You have not requested consent from any citizen."},
+                status=status.HTTP_200_OK
+            )
+
+        citizens = CustomUser.objects.filter(
+            id__in=access_requests.values_list("user_id", flat=True),
+            user_role="CITIZEN"
+        )
+
+        serializer = CitizenListSerializer(
+            citizens, 
+            many=True,
+            context={'request': request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
