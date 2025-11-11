@@ -13,10 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
-
-# Determine if we're in development (localhost) - assume DEBUG=True means localhost
-IS_DEVELOPMENT = DEBUG
+DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'truconn.onrender.com']
 
@@ -169,24 +166,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Allow preflight requests
 CORS_PREFLIGHT_MAX_AGE = 86400
-
-# Session Cookie Settings for CORS
-SESSION_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
-SESSION_COOKIE_SECURE = not IS_DEVELOPMENT  # False for localhost, True for production
-SESSION_COOKIE_HTTPONLY = True  # Security: prevent JavaScript access
-SESSION_COOKIE_AGE = 86400 * 7  # 7 days
-# Don't set SESSION_COOKIE_DOMAIN for cross-origin - let Django handle it
-# SESSION_COOKIE_DOMAIN = None  # Explicitly None for cross-origin support
-
-# CSRF Settings for API with CORS
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = not IS_DEVELOPMENT  # False for localhost, True for production
-CSRF_TRUSTED_ORIGINS = [
-    'https://truconn.vercel.app',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'https://truconn.onrender.com',  # Backend domain
-]
 
 
 

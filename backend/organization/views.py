@@ -9,7 +9,7 @@ from rest_framework import status
 from consents.models import Consent, UserConsent
 from accounts.models import CustomUser
 from .permissions import IsOrganization  
-
+from .send_mail import send_access_request_email
 
 
 class ConsentRequestView(APIView):
@@ -32,10 +32,11 @@ class ConsentRequestView(APIView):
         )
         
         access_request.save()
+        send_access_request_email(organization_id=organization.id,user_id=target_user.id,consent_id=consent.id)
 
         serializer = AccessRequestSerializer(access_request)
         return Response({
-            "message": "Access approved successfully.",
+            "message": "Access request sent successfully.",
             "data": serializer.data
         }, status=status.HTTP_200_OK)
 
