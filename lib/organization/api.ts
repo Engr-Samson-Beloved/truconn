@@ -1,4 +1,5 @@
 import { getApiHeaders } from "@/lib/utils"
+import { ApiInterceptor } from "@/lib/api-interceptor"
 
 const API_BASE_URL = "https://truconn.onrender.com/api"
 
@@ -39,14 +40,20 @@ export class OrganizationAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Please log in as an organization to view citizens")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         let errorData
         try { errorData = await response.json() } catch { throw new Error(`Failed to fetch citizens: ${response.status}`) }
         throw new Error(errorData.error || errorData.detail || errorData.message || "Failed to fetch citizens")
       }
 
+      // Update activity on successful API call
       const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
       return Array.isArray(data) ? data : []
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
@@ -69,7 +76,8 @@ export class OrganizationAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Please log in to view consent requests")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         if (response.status === 502) {
           throw new Error("Backend service is currently unavailable. Please try again later.")
@@ -86,7 +94,13 @@ export class OrganizationAPI {
         throw new Error(errorMessage)
       }
 
-      return await response.json()
+      // Update activity on successful API call
+      const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
+      return data
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection.")
@@ -119,7 +133,8 @@ export class OrganizationAPI {
           throw new Error(errorData.error || "User has not granted this consent.")
         }
         if (response.status === 401) {
-          throw new Error("Please log in as an organization to request access")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         if (response.status === 403) {
           throw new Error("Only organizations can request access")
@@ -139,7 +154,13 @@ export class OrganizationAPI {
         throw new Error(errorMessage)
       }
 
-      return await response.json()
+      // Update activity on successful API call
+      const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
+      return data
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection.")
@@ -162,7 +183,8 @@ export class OrganizationAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Please log in to manage access requests")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         if (response.status === 404) {
           throw new Error("Access request not found")
@@ -182,7 +204,13 @@ export class OrganizationAPI {
         throw new Error(errorMessage)
       }
 
-      return await response.json()
+      // Update activity on successful API call
+      const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
+      return data
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection.")

@@ -187,6 +187,9 @@ CSRF_COOKIE_HTTPONLY = False
 
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_HTTPONLY = True  # Security: prevent JavaScript access
+SESSION_COOKIE_AGE = 5 * 60 * 60  # 5 hours (18000 seconds) - inactivity timeout
+SESSION_SAVE_EVERY_REQUEST = True  # Reset session timeout on each request (activity-based)
 
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,

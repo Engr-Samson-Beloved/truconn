@@ -17,6 +17,10 @@ export default function OrganizationDashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
   const [recentRows, setRecentRows] = useState<Array<{ id: string; citizenName: string; requestedAt: string; status: string }>>([])
   const [pendingCount, setPendingCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeConsents, setActiveConsents] = useState(0)
+  const [revokedAccesses, setRevokedAccesses] = useState(0)
+  const [complianceScore, setComplianceScore] = useState(0)
 
   useEffect(() => {
     if (!authLoading && (!isAuthenticated || user?.role !== "organization")) {
@@ -26,13 +30,19 @@ export default function OrganizationDashboard() {
     if (!isAuthenticated || user?.role !== "organization") return
     const load = async () => {
       try {
+        setIsLoading(true)
         const list = await OrganizationAPI.getCitizens()
         const rows: Array<{ id: string; citizenName: string; requestedAt: string; status: string }> = []
         let pending = 0
+        let active = 0
+        let revoked = 0
+        
         list.forEach((c) => {
           c.access_requests.forEach((r, idx) => {
             const status = r.status.toLowerCase()
             if (status === "pending") pending += 1
+            if (status === "approved") active += 1
+            if (status === "revoked") revoked += 1
             rows.push({
               id: `${c.id}-${idx}-${r.requested_at}`,
               citizenName: c.full_name,
@@ -45,17 +55,23 @@ export default function OrganizationDashboard() {
         rows.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime())
         setRecentRows(rows.slice(0, 5))
         setPendingCount(pending)
+        setActiveConsents(active)
+        setRevokedAccesses(revoked)
+        
+        // Calculate compliance score (higher is better)
+        const total = active + revoked + pending
+        const score = total > 0 ? Math.round((active / total) * 100) : 100
+        setComplianceScore(score)
       } catch {
         // keep defaults on error
+      } finally {
+        setIsLoading(false)
       }
     }
     load()
   }, [isAuthenticated, authLoading, user, router])
 
-  const activeConsents = 342
-  const revokedAccesses = 28
   const pendingRequests = pendingCount
-  const complianceScore = 94.5
 
   return (
     <div className="flex h-screen bg-neutral-50">
@@ -86,30 +102,30 @@ export default function OrganizationDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <AnalyticsCard
                 title="Active Consents"
-                value={activeConsents}
-                description="Citizens with granted access"
+                value={isLoading ? "..." : activeConsents}
+                description={isLoading ? "Loading..." : "Citizens with granted access"}
                 icon={CheckCircle2}
-                trend={{ value: 12, isPositive: true }}
+                trend={isLoading ? undefined : { value: 12, isPositive: true }}
               />
               <AnalyticsCard
                 title="Revoked Accesses"
-                value={revokedAccesses}
-                description="Consent revocations this month"
+                value={isLoading ? "..." : revokedAccesses}
+                description={isLoading ? "Loading..." : "Consent revocations"}
                 icon={X}
-                trend={{ value: -5, isPositive: false }}
+                trend={isLoading ? undefined : { value: -5, isPositive: false }}
               />
               <AnalyticsCard
                 title="Pending Requests"
-                value={pendingRequests}
-                description="Awaiting approval"
+                value={isLoading ? "..." : pendingRequests}
+                description={isLoading ? "Loading..." : "Awaiting approval"}
                 icon={FileCheck}
               />
               <AnalyticsCard
                 title="Compliance Score"
-                value={`${complianceScore}%`}
-                description="NDPR compliance rating"
+                value={isLoading ? "..." : `${complianceScore}%`}
+                description={isLoading ? "Loading..." : "NDPR compliance rating"}
                 icon={TrendingUp}
-                trend={{ value: 2.5, isPositive: true }}
+                trend={isLoading ? undefined : { value: 2.5, isPositive: true }}
               />
             </div>
 

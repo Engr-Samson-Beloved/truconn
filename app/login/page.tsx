@@ -22,6 +22,14 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Check for session expired message
+  useEffect(() => {
+    const expired = searchParams.get("expired")
+    if (expired === "true") {
+      setError("Your session has expired due to inactivity. Please log in again.")
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

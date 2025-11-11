@@ -1,4 +1,5 @@
 import { getApiHeaders } from "@/lib/utils"
+import { ApiInterceptor } from "@/lib/api-interceptor"
 
 const API_BASE_URL = "https://truconn.onrender.com/api/auth"
 
@@ -178,7 +179,8 @@ export class AuthAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Please log in to view your profile")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         if (response.status === 502) {
           throw new Error("Backend service is currently unavailable. Please try again later.")
@@ -195,7 +197,13 @@ export class AuthAPI {
         throw new Error(errorMessage)
       }
 
-      return await response.json()
+      // Update activity on successful API call
+      const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
+      return data
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection.")
@@ -219,7 +227,8 @@ export class AuthAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Please log in to update your profile")
+          await ApiInterceptor.handleSessionExpired()
+          throw new Error("Your session has expired. Please log in again.")
         }
         if (response.status === 502) {
           throw new Error("Backend service is currently unavailable. Please try again later.")
@@ -245,7 +254,13 @@ export class AuthAPI {
         throw new Error(errorMessage)
       }
 
-      return await response.json()
+      // Update activity on successful API call
+      const data = await response.json()
+      if (typeof window !== "undefined") {
+        const now = Date.now()
+        localStorage.setItem('last_activity', now.toString())
+      }
+      return data
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("Failed to connect to server. Please check your internet connection.")
