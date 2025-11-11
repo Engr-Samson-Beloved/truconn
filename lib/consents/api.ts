@@ -1,3 +1,5 @@
+import { getApiHeaders } from "@/lib/utils"
+
 const API_BASE_URL = "https://truconn.onrender.com/api"
 
 export interface Consent {
@@ -20,9 +22,7 @@ export class ConsentsAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/consents/`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         credentials: "include", // Include cookies for session auth
       })
 
@@ -62,9 +62,7 @@ export class ConsentsAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/consents/${consentId}/toggle/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         credentials: "include", // Include cookies for session auth
       })
 

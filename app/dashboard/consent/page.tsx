@@ -7,6 +7,8 @@ import { ConsentToggle } from "@/components/consent-toggle"
 import { Badge } from "@/components/ui/badge"
 import { ConsentsAPI, type Consent } from "@/lib/consents/api"
 import { AlertCircle } from "lucide-react"
+import { useAuth } from "@/lib/auth/context"
+import { useRouter } from "next/navigation"
 
 interface ConsentWithStatus extends Consent {
   allowed: boolean
@@ -16,13 +18,24 @@ interface ConsentWithStatus extends Consent {
 }
 
 export default function ConsentManagementPage() {
+  const router = useRouter()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
   const [consents, setConsents] = useState<ConsentWithStatus[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    loadConsents()
-  }, [])
+    // Redirect to login if not authenticated
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login?redirect=/dashboard/consent")
+      return
+    }
+
+    // Only load data if authenticated
+    if (isAuthenticated) {
+      loadConsents()
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const loadConsents = async () => {
     try {

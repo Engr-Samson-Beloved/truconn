@@ -1,3 +1,5 @@
+import { getApiHeaders } from "@/lib/utils"
+
 const API_BASE_URL = "https://truconn.onrender.com/api/auth"
 
 export interface LoginCredentials {
@@ -74,9 +76,7 @@ export class AuthAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/login/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         body: JSON.stringify(credentials),
         // Include cookies for session authentication
         credentials: "include",
@@ -118,9 +118,7 @@ export class AuthAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/signup/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         body: JSON.stringify(data),
         // Include cookies for session authentication
         credentials: "include",
@@ -172,9 +170,7 @@ export class AuthAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/profile/`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         credentials: "include", // Include cookies for session auth
       })
 
@@ -214,9 +210,7 @@ export class AuthAPI {
     try {
       const response = await fetch(`${API_BASE_URL}/profile/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         body: JSON.stringify(data),
         credentials: "include", // Include cookies for session auth
       })

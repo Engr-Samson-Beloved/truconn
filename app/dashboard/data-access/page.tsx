@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Search, X, FileEdit, AlertCircle } from "lucide-react"
 import { OrganizationAPI, type AccessRequest } from "@/lib/organization/api"
 import { ConsentsAPI } from "@/lib/consents/api"
+import { useAuth } from "@/lib/auth/context"
+import { useRouter } from "next/navigation"
 
 interface DataAccessItem {
   id: number
@@ -30,6 +32,8 @@ interface DataAccessItem {
 }
 
 export default function DataAccessPage() {
+  const router = useRouter()
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "revoked" | "pending">("all")
   const [dataAccess, setDataAccess] = useState<DataAccessItem[]>([])
@@ -38,12 +42,21 @@ export default function DataAccessPage() {
   const [consentMap, setConsentMap] = useState<Record<number, string>>({})
 
   useEffect(() => {
-    const initialize = async () => {
-      await loadConsents()
-      await loadDataAccess()
+    // Redirect to login if not authenticated
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login?redirect=/dashboard/data-access")
+      return
     }
-    initialize()
-  }, [])
+
+    // Only load data if authenticated
+    if (isAuthenticated) {
+      const initialize = async () => {
+        await loadConsents()
+        await loadDataAccess()
+      }
+      initialize()
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const loadConsents = async () => {
     try {
