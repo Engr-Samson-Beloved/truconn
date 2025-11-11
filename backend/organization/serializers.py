@@ -17,7 +17,7 @@ class AccessRequestSerializer(serializers.ModelSerializer):
         fields = ['organization_name', 'consent_name', 'requested_at', 'purpose', 'status']
 
     def get_organization_name(self, obj):
-        return obj.org.name
+        return obj.organization.name
 
     def get_consent_name(self, obj):
         return obj.consent.name
