@@ -137,8 +137,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
 ]
 
-# For development, allow all origins (remove in production if needed)
-# Uncomment the line below if you need to allow all origins during development
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
