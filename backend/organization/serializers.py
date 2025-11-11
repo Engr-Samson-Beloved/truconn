@@ -65,6 +65,7 @@ class CitizenListSerializer(serializers.ModelSerializer):
         result = []
         for r in requests:
             result.append({
+                
                 'consent': r.consent.name,
                 'purpose': r.purpose,
                 'status': r.status,
