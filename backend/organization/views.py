@@ -80,7 +80,7 @@ class ConsentRevocationView(APIView):
 
 
 class CitizensListView(APIView):
-    permission_classes = [AllowAny, IsOrganization]
+    permission_classes = [IsAuthenticated, IsOrganization]
 
     def get(self, request):
         citizens = CustomUser.objects.filter(user_role='CITIZEN')

@@ -6,13 +6,55 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, X, CheckCircle2, AlertCircle, FileCheck } from "lucide-react"
-import { mockConsentRequests } from "@/lib/mock-data"
+import { useEffect, useMemo, useState } from "react"
+import { OrganizationAPI } from "@/lib/organization/api"
+import { useAuth } from "@/lib/auth/context"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 
 export default function OrganizationDashboard() {
+  const router = useRouter()
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
+  const [recentRows, setRecentRows] = useState<Array<{ id: string; citizenName: string; requestedAt: string; status: string }>>([])
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || user?.role !== "organization")) {
+      router.push("/login?redirect=/admin/organization")
+      return
+    }
+    if (!isAuthenticated || user?.role !== "organization") return
+    const load = async () => {
+      try {
+        const list = await OrganizationAPI.getCitizens()
+        const rows: Array<{ id: string; citizenName: string; requestedAt: string; status: string }> = []
+        let pending = 0
+        list.forEach((c) => {
+          c.access_requests.forEach((r, idx) => {
+            const status = r.status.toLowerCase()
+            if (status === "pending") pending += 1
+            rows.push({
+              id: `${c.id}-${idx}-${r.requested_at}`,
+              citizenName: c.full_name,
+              requestedAt: r.requested_at,
+              status,
+            })
+          })
+        })
+        // Sort most recent
+        rows.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime())
+        setRecentRows(rows.slice(0, 5))
+        setPendingCount(pending)
+      } catch {
+        // keep defaults on error
+      }
+    }
+    load()
+  }, [isAuthenticated, authLoading, user, router])
+
   const activeConsents = 342
   const revokedAccesses = 28
-  const pendingRequests = mockConsentRequests.filter((r) => r.status === "pending").length
+  const pendingRequests = pendingCount
   const complianceScore = 94.5
 
   return (
@@ -110,7 +152,7 @@ export default function OrganizationDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockConsentRequests.slice(0, 5).map((request) => (
+                    {recentRows.map((request) => (
                       <div
                         key={request.id}
                         className="flex items-start justify-between pb-4 border-b last:border-0"
@@ -118,7 +160,7 @@ export default function OrganizationDashboard() {
                         <div className="flex-1">
                           <p className="font-semibold text-sm text-primary">{request.citizenName}</p>
                           <p className="text-xs text-neutral-500 mt-1">
-                            {request.dataType} • {request.purpose}
+                            Recent consent request
                           </p>
                           <p className="text-xs text-neutral-400 mt-1">
                             {new Date(request.requestedAt).toLocaleDateString()}

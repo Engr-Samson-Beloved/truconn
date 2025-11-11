@@ -5,7 +5,7 @@ const API_BASE_URL = "https://truconn.onrender.com/api"
 export interface AccessRequest {
   id: number
   organization: number
-  user: string
+  user: number
   consent: number
   status: "PENDING" | "APPROVED" | "REVOKED"
   requested_at: string
@@ -28,6 +28,31 @@ export interface ToggleAccessResponse {
 }
 
 export class OrganizationAPI {
+  static async getCitizens(): Promise<Array<{ id: number; full_name: string; access_requests: Array<{ consent: string; purpose: string; status: string; requested_at: string }> }>> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/organization/citizens/list/`, {
+        method: "GET",
+        headers: getApiHeaders(),
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Please log in as an organization to view citizens")
+        }
+        let errorData
+        try { errorData = await response.json() } catch { throw new Error(`Failed to fetch citizens: ${response.status}`) }
+        throw new Error(errorData.error || errorData.detail || errorData.message || "Failed to fetch citizens")
+      }
+
+      return await response.json()
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        throw new Error("Failed to connect to server. Please check your internet connection.")
+      }
+      throw error
+    }
+  }
   /**
    * Get all consent requests for the authenticated user
    * GET /api/organization/requested-consent/
