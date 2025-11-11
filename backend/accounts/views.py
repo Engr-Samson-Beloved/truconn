@@ -60,7 +60,7 @@ class LoginView(APIView):
 
 
 class ProfileView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         profile = get_object_or_404(Profile.objects.select_related('user'), user=request.user)
         profile_serializer = ProfileSerializer(profile)
@@ -76,12 +76,7 @@ class ProfileView(APIView):
 
 
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
-class CsrfTokenView(APIView):
-    permission_classes = [AllowAny]
-    def get(self, request):
-        # The ensure_csrf_cookie decorator above ensures the csrftoken cookie is set
-        return Response({"detail": "CSRF cookie set"}, status=status.HTTP_200_OK)
+
 
 
 class LogoutView(APIView):
