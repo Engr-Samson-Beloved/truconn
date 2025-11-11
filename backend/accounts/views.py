@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.middleware.csrf import get_token
 
 class SignUpView(APIView):
     permission_classes = [AllowAny]
@@ -34,6 +35,8 @@ class LoginView(APIView):
             user = serializer.validated_data['user']
             if user is not None:
                 login(request, user)
+                csrf_token = get_token(request)
+
                 return Response({
                     "user": {
                         "id": user.id,
@@ -42,6 +45,7 @@ class LoginView(APIView):
                         "email": user.email,
                         "role": user.user_role
                     },
+                    "csrfToken": csrf_token
 
                 }, status=status.HTTP_200_OK)
             return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
