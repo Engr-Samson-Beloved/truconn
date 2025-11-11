@@ -12,7 +12,7 @@ def custom_exception_handler(exc, context):
         request = context.get('request')
         origin = request.META.get('HTTP_ORIGIN', '') if request else ''
         
-        # Check if origin is in allowed origins
+        # Check if origin is in allowed origin
         allowed_origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', [])
         if origin in allowed_origins:
             response['Access-Control-Allow-Origin'] = origin
