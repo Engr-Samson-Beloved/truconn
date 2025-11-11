@@ -4,12 +4,13 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Settings, Bell, Lock, Eye, LogOut, FileDown, Trash2, Globe } from "lucide-react"
-import { Sidebar } from "@/components/sidebar"
+import { CitizenSidebar } from "@/components/citizen-sidebar"
+import { OrganizationSidebar } from "@/components/organization-sidebar"
 import { useAuth } from "@/lib/auth/context"
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: false,
@@ -24,9 +25,14 @@ export default function SettingsPage() {
     setSettings((prev) => ({ ...prev, [key]: typeof prev[key] === 'boolean' ? !prev[key] : prev[key] }))
   }
 
+  // Determine which sidebar to use based on user role
+  const SidebarComponent = user?.role === "organization" || user?.role === "ORGANIZATION" 
+    ? OrganizationSidebar 
+    : CitizenSidebar
+
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <SidebarComponent />
       <main className="flex-1 overflow-auto">
         <div className="max-w-2xl mx-auto p-4 md:p-8">
           <div className="flex items-center gap-3 mb-8">
@@ -146,9 +152,13 @@ export default function SettingsPage() {
 
             {/* Logout */}
             <motion.button
-              onClick={() => {
-                logout()
-                router.push("/login")
+              onClick={async () => {
+                try {
+                  await logout()
+                  window.location.href = "/login"
+                } catch (error) {
+                  window.location.href = "/login"
+                }
               }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

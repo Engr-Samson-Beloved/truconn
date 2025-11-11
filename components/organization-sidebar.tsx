@@ -11,9 +11,15 @@ export function OrganizationSidebar() {
   const router = useRouter()
   const { logout } = useAuth()
 
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
+  const handleLogout = async () => {
+    try {
+      await logout()
+      // Force a hard reload to clear any cached state
+      window.location.href = "/login"
+    } catch (error) {
+      // Even if logout fails, redirect to login
+      window.location.href = "/login"
+    }
   }
 
   const navItems = [

@@ -4,7 +4,8 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Sidebar } from "@/components/sidebar"
+import { CitizenSidebar } from "@/components/citizen-sidebar"
+import { OrganizationSidebar } from "@/components/organization-sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -188,9 +189,14 @@ export default function ProfilePage() {
     return null
   }
 
+  // Determine which sidebar to use based on user role
+  const SidebarComponent = user?.role === "organization" || user?.role === "ORGANIZATION" 
+    ? OrganizationSidebar 
+    : CitizenSidebar
+
   return (
     <div className="flex h-screen bg-neutral-50">
-      <Sidebar />
+      <SidebarComponent />
 
       <main className="flex-1 overflow-auto">
         {/* Header Background */}

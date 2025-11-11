@@ -80,9 +80,15 @@ class ProfileView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Allow logout even if session expired
 
     def post(self, request):
-        logout(request)
-        return Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
+        if request.user.is_authenticated:
+            logout(request)
+        # Clear session cookie explicitly
+        request.session.flush()
+        response = Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
+        # Clear session cookie in response
+        response.set_cookie('sessionid', '', max_age=0, path='/', samesite='None', secure=True)
+        return response
 

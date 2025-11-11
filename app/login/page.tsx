@@ -55,13 +55,14 @@ function LoginForm() {
         // Check for redirect parameter
         const redirectTo = searchParams.get("redirect")
         if (redirectTo) {
-          router.push(redirectTo)
+          // Use window.location for hard redirect to clear any cached state
+          window.location.href = redirectTo
         } else {
-          // Redirect based on role
+          // Redirect based on role - use hard redirect to ensure fresh state
           if (normalizedRole === "organization") {
-            router.push("/admin/organization")
+            window.location.href = "/admin/organization"
           } else {
-            router.push("/dashboard")
+            window.location.href = "/dashboard"
           }
         }
       }

@@ -260,19 +260,22 @@ export class AuthAPI {
    */
   static async logout(): Promise<void> {
     try {
+      // Try to call backend logout, but don't fail if it doesn't work
+      // (user might already be logged out or session expired)
       const response = await fetch(`${API_BASE_URL}/logout/`, {
         method: "POST",
         headers: getApiHeaders(),
         credentials: "include",
       })
-      if (!response.ok) {
-        throw new Error("Failed to log out")
+      // Don't throw error if logout fails - we'll clear local session anyway
+      if (!response.ok && response.status !== 401) {
+        console.warn("Logout API call returned non-OK status:", response.status)
       }
     } catch (error) {
-      // swallow errors to avoid trapping user in logged-in UI if server failed
-      // Consumers may choose to ignore logout failures
-      throw error
+      // Swallow network errors - we'll clear local session anyway
+      console.warn("Logout API call failed, clearing local session:", error)
     }
+    // Always clear local session regardless of API call result
   }
 }
 

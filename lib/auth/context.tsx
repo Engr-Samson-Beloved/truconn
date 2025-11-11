@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { User } from "./api"
 import { SessionManager } from "./session"
+import { AuthAPI } from "./api"
 
 interface AuthContextType {
   user: User | null
@@ -20,21 +21,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Load user from session on mount
-    const savedUser = SessionManager.getUser()
-    if (savedUser) {
-      setUser(savedUser)
+    const loadUser = () => {
+      const savedUser = SessionManager.getUser()
+      if (savedUser) {
+        setUser(savedUser)
+      } else {
+        setUser(null)
+      }
+      setIsLoading(false)
     }
-    setIsLoading(false)
+    loadUser()
+
+    // Listen for storage changes (e.g., when another tab logs out)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "truconn_user" || e.key === null) {
+        const savedUser = SessionManager.getUser()
+        if (savedUser) {
+          setUser(savedUser)
+        } else {
+          setUser(null)
+        }
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener('storage', handleStorageChange)
+      return () => window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   const login = (userData: User) => {
+    // Clear any previous session data first to prevent session mixing
+    SessionManager.clearSession()
+    // Set new user data
     SessionManager.setUser(userData)
     setUser(userData)
   }
 
-  const logout = () => {
-    SessionManager.clearSession()
-    setUser(null)
+  const logout = async () => {
+    try {
+      // Call backend logout API to clear server session
+      await AuthAPI.logout()
+    } catch (error) {
+      // Continue with local logout even if backend call fails
+      console.error("Logout API call failed:", error)
+    } finally {
+      // Always clear local session
+      SessionManager.clearSession()
+      setUser(null)
+    }
   }
 
   return (

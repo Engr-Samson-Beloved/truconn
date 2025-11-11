@@ -76,12 +76,27 @@ export class SessionManager {
 
   static clearSession(): void {
     if (typeof window !== "undefined") {
+      // Clear all localStorage items
       localStorage.removeItem(USER_KEY)
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(JWT_TOKEN_KEY)
       
-      // Clear cookie
-      document.cookie = `${COOKIE_USER_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+      // Clear all cookies including Django session cookies
+      const cookiesToClear = [
+        COOKIE_USER_KEY,
+        'sessionid', // Django session cookie
+        'csrftoken', // CSRF token cookie
+      ]
+      
+      cookiesToClear.forEach(cookieName => {
+        // Clear for current path
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+        // Clear for root domain
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`
+        // Clear without domain (for localhost)
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure`
+      })
     }
   }
 
