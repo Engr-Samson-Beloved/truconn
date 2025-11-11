@@ -9,7 +9,7 @@ from organization.models import AccessRequest
 from organization.serializers import AccessRequestSerializer
 
 class ConsentApiView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def get(self, request):
         consent = Consent.objects.all()
         consent_serializer = ConsentSerializer(consent, many=True)
