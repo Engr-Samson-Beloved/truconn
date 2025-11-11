@@ -8,22 +8,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Org
         fields = '__all__'
 
-class UserSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name', read_only=True)  
-
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'name', 'email'] 
-        read_only_fields = ['id', 'name', 'email']
 
 class AccessRequestSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)          
-    organization = UserSerializer(read_only=True)
-
     class Meta:
         model = AccessRequest
-        fields = ['id', 'user', 'organization', 'consent', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = '__all__'()
 
 
 class CitizenListSerializer(serializers.ModelSerializer):
