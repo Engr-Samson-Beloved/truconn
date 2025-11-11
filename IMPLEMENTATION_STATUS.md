@@ -367,7 +367,7 @@ This document provides a comprehensive analysis of what has been **implemented**
 
 ## 🎯 Next Steps
 
-1. **Immediate:** Focus on NDPR compliance engine (highest impact)
+1. **Immediate:** Focus on NDPR compliance engine (highest impact);
 2. **Short-term:** Complete trust score system and notifications
 3. **Medium-term:** Build educational portal and developer tools
 4. **Long-term:** Implement AI/ML features and advanced trust mechanisms

@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/auth/', include('accounts.urls')),
     path('api/', include('consents.urls')),
     path('api/organization/', include('organization.urls')),
+    path('api/compliance/', include('compliance.urls')),
     path("health/", health_check),
 
 ]

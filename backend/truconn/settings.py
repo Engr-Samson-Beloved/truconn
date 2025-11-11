@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'accounts',
     'corsheaders',
     'consents',
-    'organization'
+    'organization',
+    'compliance',
 ]
 
 MIDDLEWARE = [
