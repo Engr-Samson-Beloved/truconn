@@ -12,7 +12,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class AccessRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessRequest
-        fields = '__all__'()
+        fields = '__all__'
 
 
 class CitizenListSerializer(serializers.ModelSerializer):
