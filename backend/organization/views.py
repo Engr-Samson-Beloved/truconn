@@ -63,7 +63,7 @@ class RequestedConsentView(APIView):
 
 
 class ConsentRevocationView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def post(self, request, access_id):
         access_requests = get_object_or_404(AccessRequest, pk=access_id, user=request.user)
         if access_requests.status != 'APPROVED':
