@@ -174,7 +174,7 @@ SESSION_COOKIE_SAMESITE = "None"
 
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
-
+CSRF_COOKIE_HTTPONLY = False
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
