@@ -149,8 +149,8 @@ export default function ConsentManagementPage() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    {consents.map((consent) => (
-                      <Card key={consent.id}>
+                {consents.map((consent, index) => (
+                      <Card key={`${consent.id}-${index}`}>
                         <CardContent className="pt-6">
                           <ConsentToggle
                             category={consent.name as "Financial" | "Biometric" | "Health" | "Identity"}

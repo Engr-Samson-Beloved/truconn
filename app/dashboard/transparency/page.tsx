@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CitizenSidebar } from "@/components/citizen-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,17 +14,63 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, Filter, Download } from "lucide-react"
-import { mockAccessLogs } from "@/lib/mock-data"
+import { Search, Filter, Download, AlertCircle } from "lucide-react"
+import { ConsentsAPI } from "@/lib/consents/api"
+import { useAuth } from "@/lib/auth/context"
+import { useRouter } from "next/navigation"
+
+interface TransparencyItem {
+  id: number
+  organizationName: string
+  dateTime: string
+  purpose: string
+  accessType: "Read" | "Write" | "Delete"
+}
 
 export default function TransparencyLogPage() {
+  const router = useRouter()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterOrg, setFilterOrg] = useState("all")
   const [filterPeriod, setFilterPeriod] = useState("all")
+  const [logs, setLogs] = useState<TransparencyItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const uniqueOrgs = Array.from(new Set(mockAccessLogs.map((log) => log.organizationName)))
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login?redirect=/dashboard/transparency")
+      return
+    }
+    if (isAuthenticated) {
+      loadLogs()
+    }
+  }, [isAuthenticated, authLoading, router])
 
-  const filteredLogs = mockAccessLogs.filter((log) => {
+  const loadLogs = async () => {
+    try {
+      setIsLoading(true)
+      setError("")
+      const response = await ConsentsAPI.getTransparencyLog()
+      const items: TransparencyItem[] = (response.data || []).map((item) => ({
+        id: item.id,
+        organizationName: `Organization ${item.organization}`, // backend doesn't include name yet
+        dateTime: item.requested_at,
+        purpose: item.purpose || "Data access",
+        accessType: item.status === "APPROVED" ? "Read" : item.status === "REVOKED" ? "Delete" : "Read",
+      }))
+      setLogs(items)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load transparency log")
+      // keep logs as-is on error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const uniqueOrgs = Array.from(new Set(logs.map((log) => log.organizationName)))
+
+  const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       log.organizationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.purpose.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,6 +102,18 @@ export default function TransparencyLogPage() {
         {/* Content */}
         <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-6">
+            {/* Error Message */}
+            {error && (
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-900">
+                    <AlertCircle className="w-5 h-5" />
+                    <p className="text-sm">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Filters */}
             <Card>
               <CardContent className="pt-6">
@@ -103,11 +161,16 @@ export default function TransparencyLogPage() {
               <CardHeader>
                 <CardTitle>Access Events</CardTitle>
                 <CardDescription>
-                  {filteredLogs.length} access event{filteredLogs.length !== 1 ? "s" : ""} recorded
+                  {isLoading
+                    ? "Loading..."
+                    : `${filteredLogs.length} access event${filteredLogs.length !== 1 ? "s" : ""} recorded`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
+                {isLoading ? (
+                  <div className="text-center py-8 text-neutral-500">Loading transparency log...</div>
+                ) : (
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Organization Name</TableHead>
@@ -141,6 +204,7 @@ export default function TransparencyLogPage() {
                     )}
                   </TableBody>
                 </Table>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -19,8 +19,33 @@ yarn-error.log*
 # env files
 .env*
 
-#Django
-venv/ 
+# Python / Django (do not ignore backend source, only artifacts)
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+backend/.venv/
+
+# Django runtime/build outputs
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+
+# OS junk
+.DS_Store
+Thumbs.db
 
 # vercel
 .vercel

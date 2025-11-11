@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
 import { AuthAPI } from "@/lib/auth/api"
 import { useAuth } from "@/lib/auth/context"
+import { SessionManager } from "@/lib/auth/session"
+import { getCsrfToken } from "@/lib/utils"
 
 function LoginForm() {
   const router = useRouter()
@@ -30,12 +32,19 @@ function LoginForm() {
       const response = await AuthAPI.login({ email, password })
       
       if (response.user) {
-        // Map backend user role to match frontend expectations
+        // Normalize role to lowercase exactly once
+        const normalizedRole = (response.user.role || "citizen").toLowerCase()
         const userData = {
           ...response.user,
-          role: response.user.role?.toLowerCase() || "citizen",
+          role: normalizedRole,
         }
         login(userData)
+
+        // Persist CSRF token to session for subsequent API calls (useful for POST/PUT)
+        const csrf = getCsrfToken()
+        if (csrf) {
+          SessionManager.setToken(csrf)
+        }
         
         // Check for redirect parameter
         const redirectTo = searchParams.get("redirect")
@@ -43,7 +52,7 @@ function LoginForm() {
           router.push(redirectTo)
         } else {
           // Redirect based on role
-          if (userData.role === "organization" || userData.role === "ORGANIZATION") {
+          if (normalizedRole === "organization") {
             router.push("/admin/organization")
           } else {
             router.push("/dashboard")

@@ -101,23 +101,33 @@ export default function SignUpPage() {
       const response = await AuthAPI.signup(signupData)
 
       if (response.user) {
-        // Map backend user to frontend format
-        // Backend returns user_role field, and id should be included as primary key
+        // Normalize role
+        const normalizedRole = (response.user.user_role || formData.role).toLowerCase()
+
+        // Immediately log the user in to establish a session (cookies)
+        try {
+          await AuthAPI.login({ email: formData.email, password: formData.password })
+        } catch {
+          // If auto-login fails, fallback to login page
+          router.push("/login")
+          return
+        }
+
+        // Set frontend session user
         const userData = {
-          id: String(response.user.id || ""), // Ensure id is a string
+          id: String(response.user.id || ""),
           first_name: response.user.first_name || (formData.role === "citizen" ? formData.first_name : ""),
           last_name: response.user.last_name || (formData.role === "citizen" ? formData.last_name : ""),
           email: response.user.email,
-          role: (response.user.user_role || formData.role).toLowerCase(),
+          role: normalizedRole,
         }
-
         login(userData)
 
         // Redirect based on role
-        if (formData.role === "citizen") {
-          router.push("/onboarding")
-        } else {
+        if (normalizedRole === "organization") {
           router.push("/admin/organization")
+        } else {
+          router.push("/onboarding")
         }
       }
     } catch (err) {

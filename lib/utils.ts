@@ -31,7 +31,16 @@ export function getApiHeaders(): HeadersInit {
     'Content-Type': 'application/json',
   }
   
-  const csrfToken = getCsrfToken()
+  // Prefer CSRF from cookie; fallback to localStorage (persisted after login)
+  let csrfToken = getCsrfToken()
+  if (!csrfToken && typeof window !== 'undefined') {
+    try {
+      const stored = window.localStorage.getItem('truconn_token')
+      if (stored) csrfToken = stored
+    } catch {
+      // ignore storage errors
+    }
+  }
   if (csrfToken) {
     headers['X-CSRFToken'] = csrfToken
   }
