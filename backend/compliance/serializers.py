@@ -1,32 +1,25 @@
 from rest_framework import serializers
-from .models import ComplianceAudit, ViolationReport, Org
+from .models import ComplianceAudit, ViolationReport
 
 
-class ComplianceAuditSerializer(serializers.ModelSerializer):
+# For saved objects (DB model instances)
+class ComplianceAuditModelSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
-    organization = serializers.PrimaryKeyRelatedField(
-        queryset=Org.objects.all()
-    )  # allows passing org IDs safely
 
     class Meta:
         model = ComplianceAudit
         fields = [
-            'id', 'organization', 'organization_name', 'rule_name',
-            'rule_description', 'severity', 'status', 'detected_at',
+            'id', 'organization', 'organization_name', 'rule_name', 
+            'rule_description', 'severity', 'status', 'detected_at', 
             'resolved_at', 'details', 'recommendation'
         ]
         read_only_fields = ['detected_at']
 
 
-class ViolationReportSerializer(serializers.ModelSerializer):
+class ViolationReportModelSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
     violation_type_display = serializers.CharField(source='get_violation_type_display', read_only=True)
-    organization = serializers.PrimaryKeyRelatedField(
-        queryset=Org.objects.all()
-    )
-    related_audit = serializers.PrimaryKeyRelatedField(
-        queryset=ComplianceAudit.objects.all(), allow_null=True, required=False
-    )
+    related_audit_name = serializers.CharField(source='related_audit.rule_name', read_only=True)
 
     class Meta:
         model = ViolationReport
@@ -34,17 +27,26 @@ class ViolationReportSerializer(serializers.ModelSerializer):
             'id', 'organization', 'organization_name', 'violation_type',
             'violation_type_display', 'description', 'affected_users_count',
             'detected_at', 'reported_to_dpo', 'resolved', 'resolution_notes',
-            'related_audit'
+            'related_audit', 'related_audit_name'
         ]
         read_only_fields = ['detected_at']
 
 
+# For compliance scan results (possibly unsaved dicts)
 class ComplianceScanResultSerializer(serializers.Serializer):
-    """Serializer for compliance scan results"""
     risk_score = serializers.IntegerField()
     total_violations = serializers.IntegerField()
     critical_count = serializers.IntegerField()
     high_count = serializers.IntegerField()
     medium_count = serializers.IntegerField()
-    violations = ViolationReportSerializer(many=True, read_only=True)  # pass list of IDs or objects
-    audit_records = ComplianceAuditSerializer(many=True, read_only=True)
+    
+    # Use plain Serializer for dicts to avoid KeyError
+    violations = serializers.ListField(
+        child=serializers.DictField(),  # expects a list of dicts, not model instances
+        read_only=True
+    )
+    
+    audit_records = serializers.ListField(
+        child=serializers.DictField(),
+        read_only=True
+    )
