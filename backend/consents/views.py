@@ -70,7 +70,6 @@ class UserConsentView(APIView):
             user_consent, created = UserConsent.objects.get_or_create(
                 user=request.user,
                 consent=consent,
-                defaults={'access': False}
             )
             
             # Toggle access
