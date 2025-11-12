@@ -95,12 +95,26 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class OrganizationProfileSerializer(serializers.ModelSerializer):
-    company = serializers.CharField(read_only=True)
-    location = serializers.CharField(source='location', read_only=True)    
-    phone = serializers.CharField(source='phone_no', read_only=True)
-    website = serializers.CharField(source='url', read_only=True)
-    bio = serializers.CharField(source='about', read_only=True)
+    company = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    website = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['company', 'location', 'phone', 'website', 'bio', 'profile_pic']
+        fields = ['company', 'location', 'phone_no', 'website', 'about', 'profile_pic']
+
+    def get_company(self, obj):
+        # Return organization name if it exists, fallback to user email
+        if hasattr(obj, 'organization'):
+            return obj.organization.name
+        return obj.user.first_name or obj.user.email
+
+    def get_location(self, obj):
+        if hasattr(obj, 'organization'):
+            return obj.organization.address
+        return obj.location
+
+    def get_website(self, obj):
+        if hasattr(obj, 'organization'):
+            return obj.organization.website
+        return obj.url
