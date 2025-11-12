@@ -35,57 +35,77 @@ class ComplianceScanView(APIView):
             # 1️⃣ Run compliance checks
             scan_result = NDPRRulesEngine.run_all_checks(organization)
 
-            # 2️⃣ Create ComplianceAudit records (idempotent)
+            # Ensure violations dicts have required keys
+            violations_data = []
+            for v in scan_result.get('violations', []):
+                violation_type = v.get('violation_type')
+                if not violation_type:
+                    continue  # skip invalid entry
+                violations_data.append({
+                    "violation_type": violation_type,
+                    "description": v.get('description', ''),
+                    "affected_users_count": v.get('affected_users_count', 0)
+                })
+
+            # Ensure audits dicts have required keys
+            audits_data = []
+            for a in scan_result.get('audits', []):
+                rule_name = a.get('rule_name')
+                if not rule_name:
+                    continue
+                audits_data.append({
+                    "rule_name": rule_name,
+                    "rule_description": a.get('rule_description', ''),
+                    "severity": a.get('severity', 'MEDIUM'),
+                    "details": a.get('details', {}),
+                    "recommendation": a.get('recommendation', '')
+                })
+
+            # 2️⃣ Idempotent creation of ComplianceAudit
             audit_records = []
-            for audit_data in scan_result.get('audits', []):
-                rule_name = audit_data['rule_name']
-
-                audit_exists = ComplianceAudit.objects.filter(
+            for audit in audits_data:
+                exists = ComplianceAudit.objects.filter(
                     organization=organization,
-                    rule_name=rule_name,
+                    rule_name=audit['rule_name'],
                     detected_at__gte=window_start
                 ).exists()
-
-                if not audit_exists:
-                    audit = ComplianceAudit.objects.create(
+                if not exists:
+                    audit_obj = ComplianceAudit.objects.create(
                         organization=organization,
-                        rule_name=rule_name,
-                        rule_description=audit_data.get('rule_description', ''),
-                        severity=audit_data.get('severity', 'MEDIUM'),
+                        rule_name=audit['rule_name'],
+                        rule_description=audit['rule_description'],
+                        severity=audit['severity'],
                         status='PENDING',
-                        details=audit_data.get('details', {}),
-                        recommendation=audit_data.get('recommendation', '')
+                        details=audit['details'],
+                        recommendation=audit['recommendation']
                     )
-                    audit_records.append(audit)
+                    audit_records.append(audit_obj)
 
-            # 3️⃣ Create ViolationReport records (idempotent)
+            # 3️⃣ Idempotent creation of ViolationReport
             violation_records = []
-            for violation_data in scan_result.get('violations', []):
-                violation_type = violation_data['violation_type']
-
-                violation_exists = ViolationReport.objects.filter(
+            for violation in violations_data:
+                exists = ViolationReport.objects.filter(
                     organization=organization,
-                    violation_type=violation_type,
+                    violation_type=violation['violation_type'],
                     detected_at__gte=window_start
                 ).exists()
-
-                if not violation_exists:
-                    violation = ViolationReport.objects.create(
+                if not exists:
+                    violation_obj = ViolationReport.objects.create(
                         organization=organization,
-                        violation_type=violation_type,
-                        description=violation_data.get('description', ''),
-                        affected_users_count=violation_data.get('affected_users_count', 0),
-                        related_audit=None  # link if needed
+                        violation_type=violation['violation_type'],
+                        description=violation['description'],
+                        affected_users_count=violation['affected_users_count'],
+                        related_audit=None
                     )
-                    violation_records.append(violation)
+                    violation_records.append(violation_obj)
 
-            # 4️⃣ Serialize results
+            # 4️⃣ Serialize for response
             audit_serializer = ComplianceAuditSerializer(audit_records, many=True)
             violation_serializer = ViolationReportSerializer(violation_records, many=True)
 
             result_data = {
                 'risk_score': scan_result.get('risk_score', 0),
-                'total_violations': scan_result.get('total_violations', 0),
+                'total_violations': scan_result.get('total_violations', len(violations_data)),
                 'critical_count': scan_result.get('critical_count', 0),
                 'high_count': scan_result.get('high_count', 0),
                 'medium_count': scan_result.get('medium_count', 0),
@@ -152,6 +172,7 @@ class ComplianceScanView(APIView):
             return Response({
                 'error': f'Failed to retrieve compliance data: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class ComplianceReportsView(APIView):
     """Get compliance reports for an organization"""
     permission_classes = [IsAuthenticated, IsOrganization]
