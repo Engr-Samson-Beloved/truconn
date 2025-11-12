@@ -1,25 +1,22 @@
-from decouple import config 
+from decouple import config
 import os
 from pathlib import Path
 import dj_database_url
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from datetime import timedelta
+
+# --------------------------------------------------
+# BASE SETTINGS
+# --------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG')
+DEBUG = config('DEBUG', cast=bool, default=False)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'truconn.onrender.com']
 
-
-# Application definition
-
+# --------------------------------------------------
+# APPLICATIONS
+# --------------------------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,28 +24,44 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework', 
-    'accounts',
+
+    # Third-party
+    'rest_framework',
     'corsheaders',
+
+    # Local apps
+    'accounts',
     'consents',
     'organization',
     'compliance',
 ]
 
+# --------------------------------------------------
+# MIDDLEWARE
+# --------------------------------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # CSRF middleware is fine to keep globally,
+    # but it won’t affect JWT-only endpoints
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
+# --------------------------------------------------
+# URLS / WSGI
+# --------------------------------------------------
 ROOT_URLCONF = 'truconn.urls'
+WSGI_APPLICATION = 'truconn.wsgi.application'
 
+# --------------------------------------------------
+# TEMPLATES
+# --------------------------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -64,84 +77,81 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'truconn.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# --------------------------------------------------
+# DATABASE
+# --------------------------------------------------
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3")
+        default=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
+        conn_max_age=600,
+        ssl_require=False
     )
 }
 
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-
-
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# --------------------------------------------------
+# AUTHENTICATION / USERS
+# --------------------------------------------------
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
-
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # Optionally enable this if you also log into Django Admin
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
     'EXCEPTION_HANDLER': 'truconn.exception_handler.custom_exception_handler',
 }
 
-# CORS Configuration
-# Allow all Vercel preview deployments and localhost
+# --------------------------------------------------
+# JWT SETTINGS
+# --------------------------------------------------
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# --------------------------------------------------
+# PASSWORD VALIDATION
+# --------------------------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# --------------------------------------------------
+# INTERNATIONALIZATION
+# --------------------------------------------------
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# --------------------------------------------------
+# STATIC & MEDIA FILES
+# --------------------------------------------------
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# WhiteNoise for static file compression
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# --------------------------------------------------
+# CORS CONFIGURATION
+# --------------------------------------------------
 CORS_ALLOWED_ORIGINS = [
     'https://truconn.vercel.app',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
-
-# For development, allow all origins (remove in production if needed)
-# Uncomment the line below if you need to allow all origins during development
-# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'GET',
@@ -157,42 +167,24 @@ CORS_ALLOW_HEADERS = [
     'accept-encoding',
     'authorization',
     'content-type',
-    'dnt',
     'origin',
     'user-agent',
-    'x-csrftoken',
     'x-requested-with',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-
-# Allow preflight requests
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-
-
-
-
-# CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = [
-    'https://truconn.vercel.app',
-    'https://truconn.onrender.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-]
-
-# Cookies configuration for cross-site sessions
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = "None"
-CSRF_COOKIE_HTTPONLY = False
-
+# --------------------------------------------------
+# SESSION SETTINGS (optional, safe defaults)
+# --------------------------------------------------
 SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_HTTPONLY = True  # Security: prevent JavaScript access
-SESSION_COOKIE_AGE = 5 * 60 * 60  # 5 hours (18000 seconds) - inactivity timeout
-SESSION_SAVE_EVERY_REQUEST = True  # Reset session timeout on each request (activity-based)
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 5 * 60 * 60  # 5 hours
+SESSION_SAVE_EVERY_REQUEST = True
 
-SIMPLE_JWT = {
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-}
+# --------------------------------------------------
+# AUTO FIELD
+# --------------------------------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
