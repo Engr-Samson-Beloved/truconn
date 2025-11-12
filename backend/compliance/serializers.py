@@ -16,7 +16,7 @@ class ComplianceAuditSerializer(serializers.ModelSerializer):
         read_only_fields = ['detected_at']
 
 
-class ViolationReportModelSerializer(serializers.ModelSerializer):
+class ViolationReportSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
     violation_type_display = serializers.CharField(source='get_violation_type_display', read_only=True)
     related_audit_name = serializers.CharField(source='related_audit.rule_name', read_only=True)
