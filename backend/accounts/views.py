@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import CustomUser, Profile
-from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, OrganizationProfileSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login, logout
@@ -19,11 +19,8 @@ class SignUpView(APIView):
             user = serializer.save()
             profile, _ = Profile.objects.get_or_create(user=user)
 
-            if user.user_role == 'CITIZEN':
-                profile_serializer = ProfileSerializer(profile)
-            else: 
-                profile_serializer = OrganizationProfileSerializer(profile)
-
+            profile_serializer = ProfileSerializer(profile)
+            
             return Response({
                 "user": serializer.data,
                 "profile": profile_serializer.data,

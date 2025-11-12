@@ -60,7 +60,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Profile(models.Model):
     user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, related_name='profile')
-    #company = models.CharField(max_length=20, blank=True)
     url = models.URLField(blank=True)
     phone_no = models.CharField(max_length=20, blank=True)
     about = models.TextField(blank=True)
