@@ -92,3 +92,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
+
+class OrganizationProfileSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name', read_only=True)
+    address = serializers.CharField(source='user.address', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['name', 'user', 'address', 'url', 'about', 'profile']
