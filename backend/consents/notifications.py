@@ -1,9 +1,7 @@
-
 """
-
-
 Auto-notification system for consent changes
 Sends emails and webhooks when consent status changes
+"""
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -15,7 +13,8 @@ import json
 
 
 def send_consent_change_notification(user_consent: UserConsent, old_access: bool, new_access: bool):
-    Send notification when user consent changes    user = user_consent.user
+    """Send notification when user consent changes"""
+    user = user_consent.user
     consent = user_consent.consent
     
     # Get all affected organizations
@@ -29,7 +28,8 @@ def send_consent_change_notification(user_consent: UserConsent, old_access: bool
     
     # Email to user
     subject = f"Consent {action.capitalize()}: {consent.name}"
-    message = fHello {user.first_name},
+    message = f"""
+Hello {user.first_name},
 
 Your consent for {consent.name} has been {action}.
 
@@ -45,6 +45,7 @@ This change affects the following organizations:
 You can manage your consents at any time in your TruCon dashboard.
 
 TruCon – Your Data, Your Control.
+"""
     
     try:
         send_mail(
@@ -69,10 +70,12 @@ TruCon – Your Data, Your Control.
 
 
 def notify_organization_consent_change(organization: Org, user: CustomUser, consent: Consent, action: str, access_request: AccessRequest):
-    Notify organization when user consent changes    org_user = organization.user
+    """Notify organization when user consent changes"""
+    org_user = organization.user
     
     subject = f"User Consent {action.capitalize()}: {consent.name}"
-    message = fHello {organization.name} Team,
+    message = f"""
+Hello {organization.name} Team,
 
 A user has {action} consent for {consent.name}:
 
@@ -89,6 +92,7 @@ Current Status: {access_request.status}
 Please review your data access policies and ensure compliance with NDPR regulations.
 
 TruCon Compliance Team
+"""
     
     try:
         send_mail(
@@ -106,7 +110,8 @@ TruCon Compliance Team
 
 
 def send_webhook_notification(organization: Org, user: CustomUser, consent: Consent, action: str, access_request: AccessRequest):
-    Send webhook notification to organization's webhook URL    # Check if organization has webhook URL configured
+    """Send webhook notification to organization's webhook URL"""
+    # Check if organization has webhook URL configured
     # For now, we'll check a future webhook_url field or use a default pattern
     # In production, organizations would configure their webhook URLs
     
@@ -140,10 +145,12 @@ def send_webhook_notification(organization: Org, user: CustomUser, consent: Cons
 
 
 def send_violation_alert(organization: Org, violation_type: str, details: dict):
-    Send alert for consent violations    org_user = organization.user
+    """Send alert for consent violations"""
+    org_user = organization.user
     
     subject = f"⚠️ NDPR Compliance Alert: {violation_type}"
-    message = fHello {organization.name} Team,
+    message = f"""
+Hello {organization.name} Team,
 
 A compliance violation has been detected:
 
@@ -158,6 +165,7 @@ Please review your data access policies and ensure all access requests
 are properly handled according to NDPR regulations.
 
 TruCon Compliance Team
+"""
     
     try:
         send_mail(
@@ -170,4 +178,3 @@ TruCon Compliance Team
     except Exception as e:
         print(f"Failed to send violation alert: {e}")
 
-"""
