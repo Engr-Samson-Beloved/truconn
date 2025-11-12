@@ -3,7 +3,7 @@ from .models import ComplianceAudit, ViolationReport
 
 
 # For saved objects (DB model instances)
-class ComplianceAuditModelSerializer(serializers.ModelSerializer):
+class ComplianceAuditSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
 
     class Meta:
