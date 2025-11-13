@@ -37,9 +37,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             if user is not None:
-                login(request, user)
-                csrf_token = get_token(request)
-                # Issue JWT tokens for API clients
+                
                 refresh = RefreshToken.for_user(user)
                 access_token = str(refresh.access_token)
 
@@ -51,7 +49,6 @@ class LoginView(APIView):
                         "email": user.email,
                         "role": user.user_role
                     },
-                    "csrfToken": csrf_token,
                     "access": access_token,
                     "refresh": str(refresh)
 
@@ -79,16 +76,9 @@ class ProfileView(APIView):
 
 
 
-
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        try:
-            refresh_token = request.data.get("refresh")
-            token = RefreshToken(refresh_token)
-            token.blacklist() 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+        logout(request)
+        return Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
