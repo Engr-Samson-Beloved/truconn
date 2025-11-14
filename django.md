@@ -107,3 +107,25 @@ GET /api/consents/transparency-log/
         }
     ]
 }
+
+
+**Profile view Response**
+
+    "profile": {
+        "id": 1,
+        "name": "Akube Holdings",
+        "email": "akubeholdings@gmail.com",
+        "website": "https://akubeholdings.org",
+        "address": "123 Maitam Abuja",
+        "phone_no": "",
+        "about": "",
+        "created_at": "2025-11-13T19:06:16.617461Z",
+        "updated_at": "2025-11-13T19:06:16.617478Z",
+        "user": "c87b3b42-a6a4-4efd-b761-d6fac6a22ef7"
+    }
+
+
+**change profile.url to profile.website** 
+**get rid of first_name and last_name and company, name alone will be fine..  So it becomes profile.name**
+**location become profile.address**
+**get rid of title**
