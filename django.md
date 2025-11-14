@@ -91,24 +91,6 @@ GET /api/consents/transparency-log/
 
 
 
-{
-    "message": "Consent requests retrieved successfully.",
-    "count": 1,
-    "data": [
-        {
-            "id": 7,
-            "organizationId": 1,
-            "organizationName": "Akube Holdings",
-            "dataType": "Fianacial",
-            "lastAccessed": "2025-11-11T17:54:38.626650Z",
-            "purpose": "for auth",
-            "status": "PENDING",
-            "consentId": 1
-        }
-    ]
-}
-
-
 **Profile view Response**
 
     "profile": {
