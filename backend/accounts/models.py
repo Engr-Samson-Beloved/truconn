@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-
+from django.conf import settings
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
 class CustomUserManager(BaseUserManager):
@@ -68,3 +68,30 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name}'s Profile"
+
+
+
+class OrgProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='org_profile',
+        limit_choices_to={'user_role': 'ORGANIZATION'}
+    )
+
+    # Organization-specific fields
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    website = models.URLField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    phone_no = models.CharField(max_length=20, blank=True)
+    about = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} Profile"
+
+
+

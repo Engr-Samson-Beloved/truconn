@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import CustomUser, Profile
-from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer
+from .models import CustomUser, Profile, OrgProfile
+from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, OrgProfileSerializer
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login, logout
@@ -13,17 +13,28 @@ from django.middleware.csrf import get_token
 
 class SignUpView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            profile, _ = Profile.objects.get_or_create(user=user)
 
-            profile_serializer = ProfileSerializer(profile)
-            
+            # Choose profile based on user role
+            if user.user_role == "CITIZEN":
+                    profile_instance, _ = user.profile.get_or_create(user=user)
+                    profile_data = ProfileSerializer(profile_instance).data
+            else:
+                profile_instance, _ = OrgProfile.objects.get_or_create(user=user)
+                profile_data = OrgProfileSerializer(profile_instance).data
+
             return Response({
-                "user": serializer.data,
-                "profile": profile_serializer.data,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.user_role
+                },
+                "profile": profile_data,
+                
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -58,21 +69,38 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        profile = get_object_or_404(Profile.objects.select_related('user'), user=request.user)
-        profile_serializer = ProfileSerializer(profile)
-        return Response(profile_serializer.data, status=status.HTTP_200_OK)
- 
+        user = request.user
+
+        if user.user_role == "CITIZEN":
+            # Safely get or create the profile
+            profile_instance, _ = Profile.objects.get_or_create(user=user)
+            serializer = ProfileSerializer(profile_instance)
+        else:  # Organization
+            profile_instance, _ = OrgProfile.objects.get_or_create(user=user)
+            serializer = OrgProfileSerializer(profile_instance)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def put(self, request):
-        profile = get_object_or_404(Profile.objects.select_related('user'), user=request.user)
-        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        user = request.user
+
+        if user.user_role == "CITIZEN":
+            profile_instance, _ = Profile.objects.get_or_create(user=user)
+            serializer = ProfileSerializer(profile_instance, data=request.data, partial=True)
+        else:  # Organization
+            profile_instance, _ = OrgProfile.objects.get_or_create(user=user)
+            serializer = OrgProfileSerializer(profile_instance, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
