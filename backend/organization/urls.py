@@ -2,7 +2,7 @@ from django.urls import path
 from .views import ConsentRequestView, RequestedConsentView, ConsentRevocationView, OrganizationAccessLog, OrganizationDetailView
 from .trust_views import TrustRegistryView, OrganizationTrustScoreView, OrganizationTrustScoreDetailView, DataIntegrityView
 from .report_views import PublicTransparencyReportView
-
+#
 urlpatterns = [
     path('consent/<uuid:user_id>/<int:consent_id>/request/', ConsentRequestView.as_view()),
     path('requested-consent/', RequestedConsentView.as_view()),

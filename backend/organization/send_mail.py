@@ -27,8 +27,7 @@ Hello {user.first_name},
 
 Consent Type: {consent.name}
 Description: {access_request.purpose}
-Current Status: {"Granted ✅" if user_consent.access else "Not Granted ❌"}
-
+Current Status: PENDING.
 Why they need it:
 {access_request.purpose if access_request else "No reason provided."}
 
