@@ -45,3 +45,40 @@ Truconn – Your Data, Your Control.
     )
 
     return {"message": "Email sent successfully"}
+
+def access_granted(organization_id, access_request_id, consent_id, user_id):
+    organization = get_object_or_404(Org, id=organization_id)
+    user = get_object_or_404(CustomUser, id=user_id)
+    consent = get_object_or_404(Consent, id=consent_id)
+
+    user_consent = get_object_or_404(UserConsent, consent=consent, user=user)
+
+    access_request = AccessRequest.objects.filter(
+        organization=organization,
+        user=user
+    ).first()
+    subject = f"{organization.name} Requests Access to Your Data"
+
+    message = f"""
+Hello {organization.name},
+
+{user.first_name} has granted access to theirr data:
+
+Consent Type: {consent.name}
+Description: {access_request.status}
+Current Status: APPROVED.
+
+
+
+Truconn – Your Data, Your Control.
+"""
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [organization.email],
+        fail_silently=False,
+    )
+
+    return {"message": "Email sent successfully"}
